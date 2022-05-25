@@ -16,10 +16,13 @@ layout: default
   <section class="post-content">
   {% if page.bootstrap %}
     <div class="bootstrap-iso">
-    {% include toc.html html=content %}
     {% endif %}
       {{ content }}
     {% if page.bootstrap %}
+    </div>
+    <div class="toc">
+      <a href="#">&lt;맨 위로&gt;</a>
+      {% include toc.html html=content %}
     </div>
   {% endif %}
   </section>
@@ -66,13 +69,13 @@ layout: default
     return headerNodes;
   }
 
-  var title = document.getElementsByClassName("title-padder")[0];
+  var title = document.getElementsByClassName("post-title")[0];
   var titleY = window.pageYOffset + title.getBoundingClientRect().top;
   
-  var article = document.getElementsByClassName("post-content")[0];
+  var article = document.getElementsByClassName("post-article")[0];
   var articleY = window.pageYOffset + article.getBoundingClientRect().top;
 
-  var toc = document.getElementsByClassName("bootstrap-iso")[0];
+  var toc = document.getElementsByClassName("toc")[0];
 
   var headerNodes = getHeaderNodes(article);
   var tocNodes = getTOCNodes(toc);
@@ -122,7 +125,6 @@ layout: default
 
   }, false);
 </script>
-
 
 
 
