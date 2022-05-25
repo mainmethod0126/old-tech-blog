@@ -16,6 +16,7 @@ layout: default
   <section class="post-content">
   {% if page.bootstrap %}
     <div class="bootstrap-iso">
+    {% include toc.html html=content %}
     {% endif %}
       {{ content }}
     {% if page.bootstrap %}
