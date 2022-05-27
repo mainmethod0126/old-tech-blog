@@ -70,6 +70,15 @@ endif %}
     return headerNodes;
   }
 
+  function setTocVisibilty(article, toc) {
+    if (article.getBoundingClientRect().right >= toc.getBoundingClientRect().left) {
+      toc.style.visibility = 'hidden';
+    } else {
+      toc.style.visibility = 'visible';
+    }
+  }
+
+
   var title = document.getElementsByClassName("title-padder")[0];
   var titleY = window.pageYOffset + title.getBoundingClientRect().top;
 
@@ -77,24 +86,20 @@ endif %}
   var articleY = window.pageYOffset + article.getBoundingClientRect().top;
   var articleX = window.pageXOffset + article.getBoundingClientRect().right;
 
-
   var toc = document.getElementsByClassName("toc")[0];
-
 
   var headerNodes = getHeaderNodes(article);
   var tocNodes = getTOCNodes(toc);
 
   var before = undefined;
 
+
   window.addEventListener('resize', function (e) {
-    if (article.getBoundingClientRect().right >= toc.getBoundingClientRect().left) {
-      toc.style.visibility = "hidden";
-    } else {
-      toc.style.visibility = "visible";
-    }
+    setTocVisibilty(article, toc);
   });
 
   document.addEventListener('scroll', function (e) {
+
     if (window.scrollY >= articleY - 60) {
       toc.style.cssText = "position: fixed; top: 60px;";
     }
@@ -135,9 +140,12 @@ endif %}
         before.classList.remove("toc-active");
     }
 
+    setTocVisibilty(article, toc);
   }, false);
-</script>
 
+
+
+</script>
 
 
 <!-- To change color of links in the page -->
