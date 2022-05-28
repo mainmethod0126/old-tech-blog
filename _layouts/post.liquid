@@ -70,8 +70,8 @@ endif %}
     return headerNodes;
   }
 
-  function setTocVisibilty(article, toc) {
-    if (article.getBoundingClientRect().right >= toc.getBoundingClientRect().left) {
+  function setTocVisibilty(postContent, toc) {
+    if (postContent.getBoundingClientRect().right >= toc.getBoundingClientRect().left) {
       toc.style.visibility = 'hidden';
     } else {
       toc.style.visibility = 'visible';
@@ -82,25 +82,20 @@ endif %}
   var title = document.getElementsByClassName("title-padder")[0];
   var titleY = window.pageYOffset + title.getBoundingClientRect().top;
 
-  var article = document.getElementsByClassName("post-content")[0];
-  var articleY = window.pageYOffset + article.getBoundingClientRect().top;
-  var articleX = window.pageXOffset + article.getBoundingClientRect().right;
+  var postContent = document.getElementsByClassName("post-content")[0];
+  var postContentY = window.pageYOffset + postContent.getBoundingClientRect().top;
 
   var toc = document.getElementsByClassName("toc")[0];
 
-  var headerNodes = getHeaderNodes(article);
+  var headerNodes = getHeaderNodes(postContent);
   var tocNodes = getTOCNodes(toc);
 
   var before = undefined;
 
 
-  window.addEventListener('resize', function (e) {
-    setTocVisibilty(article, toc);
-  });
-
   document.addEventListener('scroll', function (e) {
 
-    if (window.scrollY >= articleY - 60) {
+    if (window.scrollY >= postContentY - 60) {
       toc.style.cssText = "position: fixed; top: 60px;";
     }
     else {
@@ -140,10 +135,12 @@ endif %}
         before.classList.remove("toc-active");
     }
 
-    setTocVisibilty(article, toc);
+    setTocVisibilty(postContent, toc);
   }, false);
 
-
+  window.addEventListener('resize', function (e) {
+    setTocVisibilty(postContent, toc);
+  });
 
 </script>
 
