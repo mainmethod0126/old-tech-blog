@@ -1,14 +1,15 @@
 ---
 layout: post
-title: JAVA 메모리 누수 이슈 분석
+title: C++ 컴파일러
 tags: [java, jvm, troubleshooting]
 author: mainmethod0126
-hide: true
 excerpt_separator: <!--more-->
 ---
 
 해당 포스팅은 개발은 했지만 컴파일러에 대한 지식이 부족하기에 아래 주소의 포스팅을 읽으며 정리한 내용입니다.
 참고 : [씹어먹는 C++](https://modoocode.com/319)
+
+<!--more-->
 
 # C++의 컴파일 과정
 ---
