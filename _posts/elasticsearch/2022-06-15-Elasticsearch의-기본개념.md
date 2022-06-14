@@ -1,3 +1,15 @@
+---
+layout: post
+title: ElasticSearch의 기본개념
+tags: [elasticSearch, cluster, node, index, shard, segment]
+author: mainmethod0126
+excerpt_separator: <!--more-->
+---
+
+엘라스틱 서치를 사용하면서 약간 잊혀져가던 기본 개념을 다시 되새기기 위하여 엘라스틱 서치 서적을 구매 하여 읽고 내용을 정리하였습니다.
+
+<!--more-->
+
 # 1. 클러스터와 노드의 개념
 ## 클러스터란?
 여러 대의 컴퓨터와 혹은 구성 요소들을 논리적으로 결합하여 전체를 하나의 컴퓨터 혹은 하나의 구성 요소처럼 사용할 수 있게 해주는 기술입니다.
@@ -132,3 +144,7 @@ ElasticSearch는 최초 색인이 이루어지면 새로운 세그먼트를 생�
 ---
 
 # 3. 프라이머리 샤드와 레플리카 샤드
+
+
+# 참고 자료
+> - [박상헌,강진우,"기초부터 다지는 ElasticSearch 운영" 노하우,인사이트,2021](https://ebook.insightbook.co.kr/book/95)
