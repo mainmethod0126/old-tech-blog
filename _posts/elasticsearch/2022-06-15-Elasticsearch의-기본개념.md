@@ -1,7 +1,6 @@
 ---
 layout: post
 title: ElasticSearch의 기본개념
-tags: [elasticSearch, cluster, node, index, shard, segment]
 author: mainmethod0126
 excerpt_separator: <!--more-->
 ---
