@@ -147,4 +147,4 @@ ElasticSearch는 최초 색인이 이루어지면 새로운 세그먼트를 생�
 
 
 # 참고 자료
-> - [박상헌,강진우,"기초부터 다지는 ElasticSearch 운영" 노하우,인사이트,2021](https://ebook.insightbook.co.kr/book/95)
+> - [박상헌,강진우,"기초부터 다지는 ElasticSearch 운영 노하우",인사이트,2021](https://ebook.insightbook.co.kr/book/95)
