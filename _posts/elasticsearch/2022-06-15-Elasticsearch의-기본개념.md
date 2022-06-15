@@ -105,8 +105,7 @@ ElasticSearch에 아래와 같은 요청을 보내면 **클러스터의 이름**
 
 하나의 인덱스는 다수의 샤드로 구성되고 하나의 샤드는 다수의 세그먼트로 구성됩니다.
 단순 크기 순으로 본다면 **인덱스 > 샤드 > 세그먼트** 순입니다.
-![클러스터-노드-인덱스-샤드-세그먼트 개념](/assets/img/feature-img/elasticsearch/%ED%81%B4%EB%9F%AC%EC%8A%A4%ED%84%B0-%EB%85%B8%EB%93%9C-%EC%9D%B8%EB%8D%B1%EC%8A%A4-%EC%83%A4%EB%93%9C-%EC%84%B8%EA%B7%B8%EB%A8%BC%ED%8A%B8%20%EA%B0%9C%EB%85%90.png)
-
+![클러스터-노드-인덱스-샤드-세그먼트 개념](/assets/img/feature-img/elasticsearch/cluster-node-index-shard-segment.png)
 샤드는 1개 이상의 세그먼트로 구성되는데 샤드마다 세그먼트의 개수는 서로 다를 수 있습니다.
 만약 5개의 샤드로 구성된 인덱스라면 실제 문서들은 각각의 샤드에 나뉘어 저장됩니다.
 
@@ -123,7 +122,7 @@ ElasticSearch 에 데이터 입력 요청이 들어오면 문서 색인과정을
 먼저 아래의 이미지를 보겠습니다.
 
 
-![클러스터-노드-인덱스-샤드-세그먼트 개념](/assets/img/feature-img/elasticsearch/%EC%83%89%EC%9D%B8%EA%B3%BC%EC%A0%95.png)
+![세그먼트 생성](/assets/img/feature-img/elasticsearch/semgent.png)
 
 데이터를 업데이트하려고 시도하면 ElasticSearch는 새로운 세그먼트에 업데이트할 문서의 내용을 **새롭게 쓰고**, **기존의 데이터는 더 이상 쓰지 못하게 불용 처리**합니다.
 이러한 동작은 update 뿐 아니라 delete 도 마찬가지로 사용자가 문서를 삭제하기 위해 delete를 시도하면 바로 지우지 않고 불용 처리만 합니다.
@@ -134,7 +133,7 @@ ElasticSearch는 최초 색인이 이루어지면 새로운 세그먼트를 생�
 이러한 문제점을 보완하기 위해 ElasticSearch는 **백그라운드에서 세그먼트 병합**을 진행합니다.
 이 병합 과정에서 **작은 세그먼트들이 하나의 큰 세그먼트로 합쳐지고**, 불용 처리된 데이터를 **실제로 디스크에서 삭제**합니다.
 
-![클러스터-노드-인덱스-샤드-세그먼트 개념](/assets/img/feature-img/elasticsearch/%EC%84%B8%EA%B7%B8%EB%A8%BC%ED%8A%B8-%EB%B0%B1%EA%B7%B8%EB%9D%BC%EC%9A%B4%EB%93%9C-%EB%B3%91%ED%95%A9.png)
+![세그먼트 병합](/assets/img/feature-img/elasticsearch/sement-marging.png)
 
 
 
