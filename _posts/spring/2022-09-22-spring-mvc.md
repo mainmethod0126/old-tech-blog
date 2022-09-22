@@ -56,8 +56,6 @@ RestController 어노테이션 이름 부터 RestAPI를 지원할 것 같은 느
 그렇기 때문에 @Controller와 달리 **JSON을 반환**합니다.
 이 RestController을 분석해보면 @Controller와 달리 단순하게 **@ResponseBody** 라는 어노테이션이 하나 더 추가되있는걸 확인할 수 있습니다.
 이 **@ResponseBody** 어노테이션이 JSON을 반환할 수 있게 **HttpMessageConverter** 라는 것을 동작시켜줍니다. **HttpMessageConverter** 는 반환되는 **객체의 타입(Type)에 따라** 사전에 등록된 **MessageConverter** 중 알맞은 것을 찾아서 동작시키며, **객체를 JSON 형식으로 직렬화**하여 Response 시켜줍니다.
-
-#### 
 ~~~java
 @RestController
 public class UserController {
