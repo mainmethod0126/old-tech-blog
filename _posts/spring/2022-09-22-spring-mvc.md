@@ -1,6 +1,6 @@
 ---
 layout: post
-title: spring mvc
+title: Spring MVC
 tags: [java, spring, springboot, mvc]
 author: mainmethod0126
 excerpt_separator: <!--more-->
