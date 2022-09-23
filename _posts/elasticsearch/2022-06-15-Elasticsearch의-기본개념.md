@@ -1,7 +1,7 @@
 ---
 layout: post
 title: ElasticSearch의 기본개념
-tags: [elasticsearch, 엘라스틱서치, 샤드, shard, 인덱스, index, 세그먼트, segment]
+tags: [elasticsearch]
 author: mainmethod0126
 excerpt_separator: <!--more-->
 ---

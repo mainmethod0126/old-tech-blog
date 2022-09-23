@@ -1,7 +1,7 @@
 ---
 layout: post
 title: C++ 컴파일러
-tags: [java, jvm, troubleshooting]
+tags: [common]
 author: mainmethod0126
 excerpt_separator: <!--more-->
 ---
