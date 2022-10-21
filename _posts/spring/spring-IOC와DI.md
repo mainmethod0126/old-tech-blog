@@ -1,10 +1,4 @@
----
-layout: post
-title: Spring IOC와 DI
-tags: [spring]
-author: mainmethod0126
-excerpt_separator: <!--more-->
----
+
 
 평상시에 사용하던 IOC와 DI에 대하여 좀 더 깊이 이해하는 시간을 가져볼까 합니다.
 <!--more-->
