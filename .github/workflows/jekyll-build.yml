@@ -21,20 +21,20 @@ jobs:
         docker run \
         -v ${{ github.workspace }}:/srv/jekyll -v ${{ github.workspace }}/_site:/srv/jekyll/_site \
         jekyll/builder:latest /bin/bash -c "chmod -R 777 /srv/jekyll && jekyll build --future"
-
-    - name: Build the gem
-      continue-on-error: true
-      run: |
         bundle lock --add-platform x86_64-linux
-        gem build *.gemspec
-        echo `find . -name "*.gem" | tail -1 | awk -F"[/]" '{print $2}'`
 
     - name: Set up Ruby 2.7
       uses: ruby/setup-ruby@473e4d8fe5dd94ee328fdfca9f8c9c7afc9dae5e
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-
+    
+    - name: Build the gem
+      continue-on-error: true
+      run: |
+        gem build *.gemspec
+        echo `find . -name "*.gem" | tail -1 | awk -F"[/]" '{print $2}'`
+        
     - name: Install packages
       continue-on-error: true
       run: |
