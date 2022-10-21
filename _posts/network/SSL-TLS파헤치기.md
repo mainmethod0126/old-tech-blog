@@ -1,0 +1,112 @@
+---
+layout: post
+title: 포트(PORT) 란 무엇인가?
+tags: [network]
+author: mainmethod0126
+excerpt_separator: <!--more-->
+---
+
+# SSL/TLS
+
+SSL/TLS 가 보안을 강화한 통신 방식이고 인증서를 통해서 보안을 강화하는 것을 알았지만, 디테일하게 어떻게 동작하는지 알지 못하였기에 이를 파악해보려합니다.
+
+<!--more-->
+
+## 통신 과정
+
+바로 통신 과정부터 살펴보겠습니다
+
+### SSL Handshake
+HTTP도 결국 TCP통신 기반이기에 HandShake 과정이 존재합니다.
+
+**1. Client Hello**
+클라이언트가 서버한테 연락합니다.
+이때 아래의 정보들을 같이 보냅니다.
+- 사용가능한 암호화 방식 목록 (Cipher Suite list)
+- 클라이언트에서 생선한 랜덤 데이터(Byte)
+- Session ID
+- SSL Protocol Version
+  
+**2. Server Hello**
+Client Hello를 받은 서버가 클라이언트가 보내준 Cipher Suite list 중 하나를 선택하여 회신합니다.
+이때 아래의 정보들을 같이 보냅니다.
+- 선택된 Cipher Suite
+- 서버의 **공개키** 가 포함된 **인증서**
+- 서버측에서 생성한 랜덤 데이터
+
+자 여기서 부터 굉장히 중요합니다.
+Server Hello 를 받은 Client 는 서버가 보내준 **인증서** 가 **유효한 인증서** 인지 판단합니다.
+
+Client 는 서버로 부터 **암호화 후 Base64 로 인코딩된** 인증서 데이터를 받게됩니다
+```
+// 네이버 블로그 인증서 샘플
+
+-----BEGIN CERTIFICATE-----
+MIIG/DCCBeSgAwIBAgIQDU0+Df//H8dd2Itd3U7GkTANBgkqhkiG9w0BAQsFADBP
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMSkwJwYDVQQDEyBE
+aWdpQ2VydCBUTFMgUlNBIFNIQTI1NiAyMDIwIENBMTAeFw0yMjA4MTIwMDAwMDBa
+Fw0yMzA4MTUyMzU5NTlaMGgxCzAJBgNVBAYTAktSMRQwEgYDVQQIEwtHeWVvbmdn
+aS1kbzEUMBIGA1UEBxMLU2VvbmduYW0tc2kxFDASBgNVBAoTC05BVkVSIENvcnAu
+MRcwFQYDVQQDEw5ibG9nLm5hdmVyLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEP
+ADCCAQoCggEBAN+kuMapW1y+mVf+3nwbfDDpqoVL8rgrarjaCqtTTPj5lC5uX+B9
+HRCoT3MiJ+osw5vQJj5k3A/CQ0UYwBJtKZp2xVDYjtYGXeWZvYNQ5ChXls40yzDA
+VHqETUGGZ60KepyLdNyB6a0mTWZUAZY6GSgrF9aLaluYI0dcYZwAuM2jwRhUTUvt
+ebUegJDgHZT6wTEFOimEz/GSplW+wmlLxn91EQZHPmWU+ErrxaJmcJJbC/joCQ+h
+6iJl8mNGdPumzm5C3y3enAspcoDLnwyz1HOmlwRJmFwfqEtz8K57zJ+0X8xCgTJR
+WEh4pyhMn89S5CscXZNQVHG6N8mKRtDdQv0CAwEAAaOCA7kwggO1MB8GA1UdIwQY
+MBaAFLdrouqoqoSMeeq02g+YssWVdrn0MB0GA1UdDgQWBBTXfvYGPFidffg05LbU
+j4EqPAuIYzBjBgNVHREEXDBagg5ibG9nLm5hdmVyLmNvbYIYZ3Vlc3Rib29rLmJs
+b2cubmF2ZXIuY29tghRhZG1pbi5ibG9nLm5hdmVyLmNvbYIYYmxvZy5uYXZlcmJs
+b2d3aWRnZXQuY29tMA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcD
+AQYIKwYBBQUHAwIwgY8GA1UdHwSBhzCBhDBAoD6gPIY6aHR0cDovL2NybDMuZGln
+aWNlcnQuY29tL0RpZ2lDZXJ0VExTUlNBU0hBMjU2MjAyMENBMS00LmNybDBAoD6g
+PIY6aHR0cDovL2NybDQuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0VExTUlNBU0hBMjU2
+MjAyMENBMS00LmNybDA+BgNVHSAENzA1MDMGBmeBDAECAjApMCcGCCsGAQUFBwIB
+FhtodHRwOi8vd3d3LmRpZ2ljZXJ0LmNvbS9DUFMwfwYIKwYBBQUHAQEEczBxMCQG
+CCsGAQUFBzABhhhodHRwOi8vb2NzcC5kaWdpY2VydC5jb20wSQYIKwYBBQUHMAKG
+PWh0dHA6Ly9jYWNlcnRzLmRpZ2ljZXJ0LmNvbS9EaWdpQ2VydFRMU1JTQVNIQTI1
+NjIwMjBDQTEtMS5jcnQwCQYDVR0TBAIwADCCAX8GCisGAQQB1nkCBAIEggFvBIIB
+awFpAHcA6D7Q2j71BjUy51covIlryQPTy9ERa+zraeF3fW0GvW4AAAGCkX4p5AAA
+BAMASDBGAiEAv4VafHfljFU/RO6pSDaCpbuxpUxM9k6NTO8iOhC3jk8CIQDqpiva
+xRe/Tc/4q84PJKXIveHekAaZwRmr7SNRwLO2fAB3ADXPGRu/sWxXvw+tTG1Cy7u2
+JyAmUeo/4SrvqAPDO9ZMAAABgpF+KU0AAAQDAEgwRgIhAKM/V4KPwx4fpimpKFYy
+xN9RlUmw6LPLFXaQA2STsf3wAiEA1v0pL8rIqwR49oHWJY+CtRk5WGHlNbyfeRFj
+g1JqZsUAdQCzc3cH4YRQ+GOG1gWp3BEJSnktsWcMC4fc8AMOeTalmgAAAYKRfimg
+AAAEAwBGMEQCIFddEhxXU6KToGyox5De4OO8cZbA5oJOf8lriNNQhjpMAiBsLh6a
+UhpV+EfzRrusXYscbk9AV1pc9URmKM5JF4UUZDANBgkqhkiG9w0BAQsFAAOCAQEA
+W0vtbkjCjocRqyqDt7AKICPF4VXNPt+UaLjrMGea3MgxgJ8Ls0uOvpJV5OQp1Raa
+TwbSbbS2vYGud6hYLxfkbtTxkDL+F1wkeN8R0Sk8LZPHkL+SZXP+lI3ddg5q0tT4
+3dOuv/w+no0AWg2Q3+dfO6NXB91hIHVcFk/fnYPnl/NUXvY0l81pYdSXxLexdNN3
+Dm895F1PN3EieJHkwDdFlk+oMBjlxcjbOs6kdHdstKLsDqTF8F64vF78s+i/Y9OW
+feajU+N+iY7h/YIWb0oiIOvE8ahiiikr1dO44O/H5mmFMUywHUgN8rab+xsQs+rZ
+ASII0miLWqHaD7jDe30LLQ==
+-----END CERTIFICATE-----
+```
+Client는 이 **`인증서 데이터`** 를 **`디코딩 한 후`** **`ROOT CA(Certificate Authority, 인증기관)`** 정보를 확인하여, 공공연하게 알려진 CA라면 해당 **`CA의 공개키`** 를 찾아 **`암호화 되어있던 인증서 데이터`** 를 복호화하는 **`첫번째 검증 작업`** 을 진행합니다.
+이때 복호화에 성공하면 **`첫번째 검증`** 을 통과한 것이고 그 다음으로 **`암호화 되어있는 CA의 서명`** 을 **`CA의 공개키`** 로 복호화 한 후 **`Hash 형태인 지문`** 과 비교하는 **`Hash 검증`** 으로 인증서 자체의 변조 여부를 확인합니다.
+
+최종적으로 진행한 Hash 검증 결과도 정상으로 나오면 해당 인증서는 **`유효한 인증서`** 로 판단됩니다.
+
+이렇게 **`인증서 확인 절차`** 를 거친 후 다음 단계인 **`Client key exchange(사용자 키 교환)`** 를 진행합니다.
+
+> **서명 과 지문**
+> **`서명`** 은 CA가 해당 인증서를 **`신뢰할 수 있는 인증서`** 라고 보증해준다는 인증 정보이며
+> > 
+> 이 서명은 **`Server`** 가 CA에게 **`CSR(Certificate Signing Request, 인증서 서명 요청)`** 형태로 **`Server 공개키`** 및 부가적인 인증서의 정보 (사용하는 알고리즘 정보, 국가코드, 도시, 회사명, 부서명, 이메일, 도메인 주소(CN)) 등을 포함하여 CA 에게 전달하면, CA는 전달 받은 정보들을 Hash알고리즘을 통한 해싱을 진행 후 결과로 나온 **`해시값`** 을 인증서의 **`지문`** 이라는 명칭으로 저장하고,
+> 이 **`지문`** 을 **`CA의 비공개키`** 로 암호화하여 **`서명`** 이라는 명칭으로 인증서에 저장합니다.
+> 나머지 정보들은 인증서 생성에 사용되며 특히, **`CSR에 포함된 공개키`** 는 차후 **`Client`** 가 데이터를 주고 받는데 사용 할 **`대칭키`** 를 생성하는데 이를 **`서버에 암호화해서 전달`** 할 때 필요한 중요한 요소입니다.
+> 
+> 이렇게 생성된 인증서를 다시 한번 **`CA의 비공개키`** 로 암호화하여 **`서명 요청자(Server)`** 에게 **`완성된 형태의 인증서`** 로 발급해줍니다.
+
+**3. Client key exchange**
+
+
+
+**4. Finished**
+
+
+
+
+
+
+
