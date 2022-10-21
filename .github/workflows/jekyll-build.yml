@@ -30,7 +30,7 @@ jobs:
     - name: Install packages
       continue-on-error: true
       run: |
-        sudo chmod -R 755 /var/lib/gems/2.7.0
+        sudo chmod -R 777 /var/lib/gems/2.7.0
         gem install type-on-strap
         gem install jekyll-theme-type-on-strap
         docker pull sylhare/type-on-strap
