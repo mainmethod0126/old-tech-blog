@@ -142,7 +142,335 @@ MemberService memberService = annotationConfigApplicationContext.getBean("member
 ```
 
 여기서 약간 호기심이 더 많으신 분이라면 ApplicationContextConfig 클래스에서 **@Configuration** 을 사용하지 않으면 Bean 등록이 불가능한가? 라는 궁금증을 갖으실 수 있습니다.
+
 #### @Configuration 을 사용하지 않는다면?
+
+결론만 먼저 말씀 드리면 **@Configuration** 사용하지 않고 **@Bean** 어노테이션만 사용하여 **Bean 등록** 시 **싱글턴이 보장되지 않습니다** 즉, 단일 빈 하나만 생성하고 재활용되는게 아니라 생성 요청 (new 를 이용한 객체 생성 호출) 시 그대로 객체가 생성되어 버립니다.
+
+그 이유로는 Spring의 싱글턴 객체를 생성하는 방식에 있는데, Spring은 **빈 생성** 시 **CILIB(Byte Code Generation Library)** 를 이용하여 **프록시 객체** 라는 것을 생성하여 실제 **@Configuration** 가 적용된 클래스를 이용하여 객체를 생성하는 것이 아닌, **JAVA 바이트코드 조작** 을 통하여 **실제 Bean으로 등록될 별도의 클래스를 생성** 합니다.
+그 후 이 **생성된 별도의 클래스를 이용해 생성한 객체를 빈으로 등록** 합니다.
+
+이게 무슨 말이냐.. 설명을 돕기 위해 코드를 예를들겠습니다.
+
+##### 사용자가 정의한 Bean 설정 클래스
+
+```java
+@Configuration
+public class ApplicationContextConfig {
+    @Bean
+    public MemberService memberService() {
+        return new MemberServiceImpl(memoryMemberRepository());
+    }
+
+    @Bean
+    public MemberRepository memoryMemberRepository() {
+        return new MemoryMemberRepository();
+    }
+
+    @Bean
+    public MemberRepository mariaDBMemberRepository() {
+        return new MariaDBMemberRepository();
+    }
+}
+```
+
+##### CILIB 의 바이트코드 조작을 통하여 자동으로 생성된 Bean 설정 클래스 (예시를 위한 의사코드입니다)
+
+```java
+/**
+ * CILIB가 ApplicationContextConfig 를 상속받은 하위 클래스를 생성합니다.
+ */
+@Configuration
+public class CilibApplicationContextConfig extends ApplicationContextConfig {
+    @Bean
+    @Override
+    public MemberService memberService() {
+
+        // Bean 이미 등록되었는지 확인 후 등록되어있지 않을 경우에만 생성하도록 합니다.
+        if (memberService is already registered bean) {
+            return memberService;
+        } else {
+            return new MemberServiceImpl(memoryMemberRepository());
+        }
+    }
+
+    @Bean
+    @Override
+    public MemberRepository memoryMemberRepository() {
+
+        // Bean 이미 등록되었는지 확인 후 등록되어있지 않을 경우에만 생성하도록 합니다.
+        if (memoryMemberRepository is already registered bean) {
+            return memoryMemberRepository;
+        } else {
+            return new MemoryMemberRepository();
+        }
+    }
+
+    @Bean
+    @Override
+    public MemberRepository mariaDBMemberRepository() {
+
+        // Bean 이미 등록되었는지 확인 후 등록되어있지 않을 경우에만 생성하도록 합니다.
+        if (mariaDBMemberRepository is already registered bean) {
+            return mariaDBMemberRepository;
+        } else {
+            return new MariaDBMemberRepository();
+        }
+    }
+}
+```
+
+CILIB 가 생성하는 클래스는 기존의 사용자가 정의한 **ApplicationContextConfig** 를 상속받아 **빈 등록 함수들을 재정의** 합니다. 그 이후 실제로 CILIB를 통하여 생성된 **CilibApplicationContextConfig(가칭)** 클래스가 **빈으로 등록됩니다**
+사용자는 디버깅을 해보지 않는 이상 내가 정의한 **ApplicationContextConfig** 가 Bean으로 등록되었다고 착각하게 됩니다.
+
+다시 정리해보면, Bean 객체 생성 시점에서 중간에 프로그램의 흐름을 가져와 **CilibApplicationContextConfig** 라는 별도의 클래스를 생성하고 해당 객체를 등록될 Bean과 갈아 끼워버리는 일종의 도둑질(?)을 하는 것 입니다. (해당 부분 실제로 코드를 분석한 것이 아니라 다를 수 있습니다. 내용이 달라질 경우 글을 수정하도록 하겠습니다.)
+
+이렇게 어떤 기능 앞, 뒤로 뜬금없는 다른 기능을 끼워넣어서 실행시키는 것을 **프록시 패턴(Proxy Pattern)** 이라고 하며
+이 개념을 도입하여 개발하는 것을 **AOP(Aspect Oriented Programming, 관점 지향 프로그래밍)** 이라고 합니다.
+
+이 **프록시 패턴** 이 **@Configuration** 이 존재해야지만 작동하게 되는데, 실제로 **@Configuration** 가 있고, 없고의 차이를 동일한 클래스로 두번 이상 **Bean 등록을 시도**하여 등록된 **Bean** **동일한 객체**인지, 아니면 **별도의 객체**인지 비교를 통하여 확인해보겠습니다.
+
+우선 **ApplicationContextConfig** 클래스를 약간 수정해보겠습니다.
+
+```java
+
+
+
+/**
+ * MemberService.java
+ */
+public interface MemberService {
+
+    /**
+     * 멤버 정보 저장
+     * 
+     * @param memberId   : 멤버 고유값
+     * @param memberName : 멤버 이름
+     */
+    public void save(String memberId, String memberName);
+
+    /**
+     * 멤버 정보 반환
+     * 
+     * @param memberId
+     * @return : 멤버 이름
+     */
+    public String findById(String memberId);
+
+    public MemberRepository getMemberRepository();
+
+}
+```
+
+```java
+/**
+ * MemberServiceImpl.java
+ */
+public class MemberServiceImpl implements MemberService {
+
+    private final MemberRepository memberRepository;
+
+    /**
+     * 생성자가 하나라면 Autowired는 생략 가능하나 저는 붙여주는걸 좋아합니다.
+     */
+    @Autowired
+    public MemberServiceImpl(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
+
+    @Override
+    public void save(String memberId, String memberName) {
+
+        memberRepository.save(memberId, memberName);
+    }
+
+    @Override
+    public String findById(String memberId) {
+
+        return memberRepository.findById(memberId);
+    }
+
+    @Override
+    public MemberRepository getMemberRepository() {
+        return this.memberRepository;
+    }
+
+}
+```
+
+```java
+/**
+ * OrderService.java
+ */
+public class OrderService implements MemberService {
+
+    private final MemberRepository memberRepository;
+
+    /**
+     * 생성자가 하나라면 Autowired는 생략 가능하나 저는 붙여주는걸 좋아합니다.
+     */
+    @Autowired
+    public OrderService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
+
+    @Override
+    public void save(String memberId, String memberName) {
+
+        memberRepository.save(memberId, memberName);
+    }
+
+    @Override
+    public String findById(String memberId) {
+
+        return memberRepository.findById(memberId);
+    }
+
+    @Override
+    public MemberRepository getMemberRepository() {
+        return this.memberRepository;
+    }
+
+}
+```
+
+```java
+/**
+ * ApplicationContextConfig.java
+ */
+@Configuration
+public class ApplicationContextConfig {
+    @Bean
+    public MemberService memberService() {
+        System.out.println("call memberService");
+        return new MemberServiceImpl(memoryMemberRepository());
+    }
+
+    @Bean
+    public MemberService orderService() {
+        System.out.println("call orderService");
+        return new MemberServiceImpl(memoryMemberRepository());
+    }
+
+    @Bean
+    public MemberRepository memoryMemberRepository() {
+        System.out.println("call memoryMemberRepository");
+        return new MemoryMemberRepository();
+    }
+
+    @Bean
+    public MemberRepository mariaDBMemberRepository() {
+        System.out.println("call mariaDBMemberRepository");
+        return new MariaDBMemberRepository();
+    }
+}
+```
+
+```java
+public class ApplicationContextConfigNotUseAnnotation {
+    @Bean
+    public MemberService memberService() {
+        System.out.println("call memberService");
+        return new MemberServiceImpl(memoryMemberRepository());
+    }
+
+    @Bean
+    public MemberService orderService() {
+        System.out.println("call orderService");
+        return new MemberServiceImpl(memoryMemberRepository());
+    }
+
+    @Bean
+    public MemberRepository memoryMemberRepository() {
+        System.out.println("call memoryMemberRepository");
+        return new MemoryMemberRepository();
+    }
+
+    @Bean
+    public MemberRepository mariaDBMemberRepository() {
+        System.out.println("call mariaDBMemberRepository");
+        return new MariaDBMemberRepository();
+    }
+}
+
+```
+
+```java
+
+public class AnnotationConfigApplicationContextTest {
+
+    @Test
+    @DisplayName("@Configuration 을 사용하는 Config 파일로 annotationConfigApplicationContext Test")
+    public void annotationConfigApplicationContextTest_use_Configuration_annotation() {
+
+        try (AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
+                ApplicationContextConfig.class)) {
+            MemberService memberService = annotationConfigApplicationContext.getBean("memberService",
+                    MemberService.class);
+            MemberService orderService = annotationConfigApplicationContext.getBean("orderService",
+                    MemberService.class);
+
+            System.out.println("getBean : " + memberService.getMemberRepository());
+            System.out.println("getBean : " + orderService.getMemberRepository());
+
+            String memberId = "abc";
+            String memberName = "wusubshin";
+
+            memberService.save(memberId, memberName);
+
+            for (String beanDefinitioName : annotationConfigApplicationContext.getBeanDefinitionNames()) {
+
+                BeanDefinition beanDefinition = annotationConfigApplicationContext.getBeanDefinition(beanDefinitioName);
+
+                if (beanDefinition.getRole() == BeanDefinition.ROLE_APPLICATION) {
+
+                    System.out.println(beanDefinition);
+                }
+
+            }
+
+            System.out.println("found member : " + memberService.findById(memberId));
+        }
+    }
+
+    @Test
+    @DisplayName("@Configuration 을 사용하지 않은 Config 파일로 annotationConfigApplicationContext Test")
+    public void annotationConfigApplicationContextTest_not_use_Configuration_annotation() {
+
+        try (AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
+                ApplicationContextConfigNotUseAnnotation.class)) {
+            MemberService memberService = annotationConfigApplicationContext.getBean("memberService",
+                    MemberService.class);
+            MemberService orderService = annotationConfigApplicationContext.getBean("orderService",
+                    MemberService.class);
+
+            System.out.println("getBean : " + memberService.getMemberRepository());
+            System.out.println("getBean : " + orderService.getMemberRepository());
+
+            String memberId = "abc";
+            String memberName = "wusubshin";
+
+            memberService.save(memberId, memberName);
+
+            System.out.println("found member : " + memberService.findById(memberId));
+
+            for (String beanDefinitioName : annotationConfigApplicationContext.getBeanDefinitionNames()) {
+
+                BeanDefinition beanDefinition = annotationConfigApplicationContext.getBeanDefinition(beanDefinitioName);
+
+                if (beanDefinition.getRole() == BeanDefinition.ROLE_APPLICATION) {
+
+                    System.out.println(beanDefinition);
+                }
+
+            }
+        }
+    }
+}
+
+```
+
+추가 작성 필요
 
 
 
