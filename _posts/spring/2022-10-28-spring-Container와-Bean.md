@@ -45,6 +45,7 @@
 보통 스프링컨테이너 즉, 빈을 관리하기 위해 사용하게 될 ApplicationContext 의 구현체를 알아보기 위해서 소스코드를 본 결과 생각보다 여러가지가 존재했습니다
 
 ![applicationContextImpls.png](/assets/img/feature-img/spring/applicationContextImpls.png)
+*캡션 테스트*
 
 위 사진을 보면 ApplicationContext를 최상위 인터페이스로하는 여러 클래스 및 인터페이스가 존재합니다.
 모든 클래스를 다 알아보기에는 시간과 정신력이 부족함으로 대표적으로 사용되는 **3개의 클래스** 를 알아보겠습니다.
