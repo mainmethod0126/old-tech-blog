@@ -53,7 +53,99 @@
 ![GenericApplicationContextChildrens.png](/assets/img/feature-img/spring/GenericApplicationContextChildrens.png)
 ![ApplicationContextImpls-02.png](/assets/img/feature-img/spring/ApplicationContextImpls-02.png)
 
+그전에 잠시 Ann
+
 ### AnnotationConfigApplicationContext
+
+**AnnotationConfigApplicationContext** 는 **어노테이션 기반 자바 코드**를 이용하여 **빈 의존관계**를 설정할 수 있도록 되어있는 스프링 컨텍스트입니다.
+
+그렇다면 어떤 어노테이션을 이용하여 **빈 의존관계** 를 설정할 수 있을까요?
+
+이때 사용되는 어노테이션은 **@Configuration** 입니다.
+
+대략적인 사용방법을 알아보자면 먼저 **@Configuration** 이 적용된 **Bean설정을 위한 클래스** 가 존재해야합니다.
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.example.demo.member.MemberService;
+import com.example.demo.member.MemberServiceImpl;
+import com.example.demo.member.repo.MariaDBMemberRepository;
+import com.example.demo.member.repo.MemberRepository;
+import com.example.demo.member.repo.MemoryMemberRepository;
+
+@Configuration
+public class ApplicationContextConfig {
+    @Bean
+    public MemberService memberService() {
+        return new MemberServiceImpl(memoryMemberRepository());
+    }
+
+    @Bean
+    public MemberRepository memoryMemberRepository() {
+        return new MemoryMemberRepository();
+    }
+
+    @Bean
+    public MemberRepository mariaDBMemberRepository() {
+        return new MariaDBMemberRepository();
+    }
+}
+```
+
+예를 들어 위와 같은 **Bean설정을 위한 클래스** 가 존재할 때 이를 이용하여 **AnnotationConfigApplicationContext** 객체를 생성할 수 있습니다.
+
+```java
+public class AnnotationConfigApplicationContextTest {
+
+    @Test
+    @DisplayName("@Configuration 을 사용하는 Config 파일로 annotationConfigApplicationContext Test")
+    public void annotationConfigApplicationContextTest_use_Configuration_annotation() {
+
+        try (AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
+                ApplicationContextConfig.class)) {
+            MemberService memberService = annotationConfigApplicationContext.getBean("memberService",
+                    MemberService.class);
+
+            String memberId = "abc";
+            String memberName = "wusubshin";
+
+            memberService.save(memberId, memberName);
+
+            System.out.println("found member : " + memberService.findById(memberId));
+        }
+    }
+}
+```
+
+> **여기서 잠깐!**
+> AnnotationConfigApplicationContext 클래스의 상속 관계를 살펴보면 ConfigurableApplicationContext 라는 인터페이스를 찾을 수 있는데, 이 인터페이스는 **Closeable 인터페이스** 를 상속받았습니다.
+> 그렇기 때문에 try () {} 문법을 통하여 **close() 호출**이 보장되지 않을 경우
+> **Resource leak: 'annotationConfigApplicationContext' is never closedJava(536871799)** 라는 경고가 발생합니다.
+> 좀 더 자세한 정보는 **Closeable 인터페이스** 에 대하여 별도 검색을 부탁드리겠습니다.
+
+위와 예시 코드의 **AnnotationConfigApplicationContext 생성자 호출** 부분을 보면 사전에 작성해놓은 **Bean설정을 위한 클래스 ApplicationContextConfig** 의 클래스 타입을 매개변수로 받는 걸 확인할 수 있습니다.
+
+```java
+AnnotationConfigApplicationContext annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
+                ApplicationContextConfig.class)
+```
+
+이렇게 **ApplicationContextConfig.class** 를 매개변수로 하여 객체를 생성하게 되면,
+ApplicationContextConfig 내부에 정의되어있던 **@Bean 어노테이션** 이 붙은 함수의 반환 객체들을 모두 **Bean 으로 등록** 됩니다.
+
+정말 Bean등록이 잘 이루어졌는지 확인하기 위해서 **@Bean** 이 붙어있던 **메소드의 이름** 으로 **getBean()** 을 호출하면 생성된 **Bean 객체** 를 얻어올 수 있습니다.
+
+```java
+MemberService memberService = annotationConfigApplicationContext.getBean("memberService",MemberService.class);
+```
+
+여기서 약간 호기심이 더 많으신 분이라면 ApplicationContextConfig 클래스에서 **@Configuration** 을 사용하지 않으면 Bean 등록이 불가능한가? 라는 궁금증을 갖으실 수 있습니다.
+#### @Configuration 을 사용하지 않는다면?
+
+
+
 
 ### GenericGroovyApplicationContext
 
