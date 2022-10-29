@@ -53,4 +53,8 @@
 ![GenericApplicationContextChildrens.png](/assets/img/feature-img/spring/GenericApplicationContextChildrens.png)
 ![ApplicationContextImpls-02.png](/assets/img/feature-img/spring/ApplicationContextImpls-02.png)
 
-### AnnotationConfig
+### AnnotationConfigApplicationContext
+
+### GenericGroovyApplicationContext
+
+### GenericXmlApplicationContext
