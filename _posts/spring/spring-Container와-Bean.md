@@ -229,7 +229,7 @@ CGLIB 가 생성하는 클래스는 기존의 사용자가 정의한 **Applicati
 
 실제로 **getBean(ClassType)** 을 통하여 **getBean(ApplicationContextConfig.class)** 을 꺼내와서 객체 자체 toString() 해보면 웬걸? **CGLIB**이라는 이상한 텍스트가 낑겨있는 걸 확인할 수 있습니다. 바로 **CGLIB 라이브러리** 가 만든 **별도의 클래스**를 말하는 것이죠.
 > **여기서 잠깐! 별도의 클래스가 등록되었는데 ApplicationContextConfig Type으로 조회가 되네?**
-스프링 컨테이너(ApplicationContext)에서 **Type으로 빈 조회 시** 해당 Type의 하위 클래스는 모두 조회되는 특징이 있습니다.
+스프링 컨테이너(ApplicationContext)에서 **Type으로 빈 조회 시** 해당 Type의 **하위 클래스는 모두 조회되는 특징**이 있습니다.
 > **CGLIB 라이브러리** 가 생성한 별도의 클래스는 **ApplicationContextConfig** 을 부모로하는 하위 클래스이기 때문에 부모 클래스인 **ApplicationContextConfig** 로 조회가 가능합니다
 
 이렇게 어떤 기능 앞, 뒤로 뜬금없는 다른 기능을 끼워넣어서 실행시키는 것을 **프록시 패턴(Proxy Pattern)** 이라고 하며
