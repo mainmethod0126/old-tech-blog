@@ -1,4 +1,16 @@
+---
+layout: post
+title: Spring-BeanFactory와-ApplicationContext(미완성)
+tags: [spring]
+author: mainmethod0126
+excerpt_separator: <!--more-->
+---
+
 # BeanFactory 와 ApplicationContext
+
+Spring에 대한 기본 지식 습득을 위하여 인터넷 강의 및 코드 분석 후 알게된 내용을 포스팅합니다.
+
+<!--more-->
 
 ## BeanFactory
 
