@@ -52,6 +52,8 @@ Spring에 대한 기본 지식 습득을 위하여 인터넷 강의 및 코드 �
 이렇게 많은 기능이 추가되어 확장된 **ApplicationContext**도 결국은 **인터페이스**입니다 실제로 이 기능들을 단순히 추상 메소드로 실제로는 구현되지 않은 메소드들입니다, 쉽게 말해 **껍데기만 존재하는 깡통**입니다.
 그렇다면 실제로 이 많은 기능들을 구현하게되는 **ApplicationContext 구현체**들에 대하여 알아보겠습니다
 
+---
+
 ## ApplicationContext 구현체 (대표적인 3개)
 
 보통 스프링컨테이너 즉, 빈을 관리하기 위해 사용하게 될 ApplicationContext 의 구현체를 알아보기 위해서 소스코드를 본 결과 생각보다 여러가지가 존재했습니다
@@ -65,7 +67,7 @@ Spring에 대한 기본 지식 습득을 위하여 인터넷 강의 및 코드 �
 ![GenericApplicationContextChildrens.png](/assets/img/feature-img/spring/GenericApplicationContextChildrens.png)
 ![ApplicationContextImpls-02.png](/assets/img/feature-img/spring/ApplicationContextImpls-02.png)
 
-그전에 잠시 Ann
+---
 
 ### AnnotationConfigApplicationContext
 
@@ -132,6 +134,7 @@ public class AnnotationConfigApplicationContextTest {
 ```
 
 > **여기서 잠깐!**
+> 
 > AnnotationConfigApplicationContext 클래스의 상속 관계를 살펴보면 ConfigurableApplicationContext 라는 인터페이스를 찾을 수 있는데, 이 인터페이스는 **Closeable 인터페이스** 를 상속받았습니다.
 > 그렇기 때문에 try () {} 문법을 통하여 **close() 호출**이 보장되지 않을 경우
 > **Resource leak: 'annotationConfigApplicationContext' is never closedJava(536871799)** 라는 경고가 발생합니다.
@@ -154,6 +157,8 @@ MemberService memberService = annotationConfigApplicationContext.getBean("member
 ```
 
 여기서 약간 호기심이 더 많으신 분이라면 ApplicationContextConfig 클래스에서 **@Configuration** 을 사용하지 않으면 Bean 등록이 불가능한가? 라는 궁금증을 갖으실 수 있습니다.
+
+---
 
 #### @Configuration 을 사용하지 않는다면?
 
@@ -240,17 +245,24 @@ CGLIB 가 생성하는 클래스는 기존의 사용자가 정의한 **Applicati
 실제로 저희가 **AnnotationConfigApplicationContext** 의 생성자 파라미터로 주입한 클래스 정보는 **ApplicationContextConfig.class** 이니 **ApplicationContextConfig** 객체가 빈으로 등록됬어야하는데, 실제로는 **CglibApplicationContextConfig** 객체가 빈으로 등록되는 것 입니다.
 
 실제로 **getBean(ClassType)** 을 통하여 **getBean(ApplicationContextConfig.class)** 을 꺼내와서 객체 자체 toString() 해보면 웬걸? **CGLIB**이라는 이상한 텍스트가 낑겨있는 걸 확인할 수 있습니다. 바로 **CGLIB 라이브러리** 가 만든 **별도의 클래스**를 말하는 것이죠.
+
 > **여기서 잠깐! 별도의 클래스가 등록되었는데 ApplicationContextConfig Type으로 조회가 되네?**
-스프링 컨테이너(ApplicationContext)에서 **Type으로 빈 조회 시** 해당 Type의 **하위 클래스는 모두 조회되는 특징**이 있습니다.
+>
+>스프링 컨테이너(ApplicationContext)에서 **Type으로 빈 조회 시** 해당 Type의 **하위 클래스는 모두 조회되는 특징**이 있습니다.
 > **CGLIB 라이브러리** 가 생성한 별도의 클래스는 **ApplicationContextConfig** 을 부모로하는 하위 클래스이기 때문에 부모 클래스인 **ApplicationContextConfig** 로 조회가 가능합니다
 
 이렇게 어떤 기능 앞, 뒤로 뜬금없는 다른 기능을 끼워넣어서 실행시키는 것을 **프록시 패턴(Proxy Pattern)** 이라고 하며
 이 개념을 도입하여 개발하는 것을 **AOP(Aspect Oriented Programming, 관점 지향 프로그래밍)** 이라고 합니다.
 
 > **여기서 잠깐! 이게 말이되는건가?!**
+>
 > 우리가 보고있는 이 행위는 소스코드가 컴파일 된 후 실행 단계인 **런타임 단계**에서 이미 컴파일 단계에서 생성되어진 **java 바이트코드** 에 접근하여 수정하는 마법 같은 작업입니다. 이게 가능한 이유는 **java의 특징인 리플렉션(reflection)** 때문인데 이에 대한 더 자세한 정보는 나중에 시간을 마련하여 공부를 한 후 포스팅을 진행하겠습니다.
 
 이 **프록시 패턴** 이 **@Configuration** 이 존재해야지만 작동하게 되는데, 실제로 **@Configuration** 가 있고, 없고의 차이를 동일한 클래스로 두번 이상 **Bean 등록을 시도**하여 등록된  **동일한 Bean 객체** 인지, 아니면 **별도의 객체**인지 비교를 통하여 확인해보겠습니다.
+
+---
+
+### 테스트 코드를 통한 @Configuration 적용 미적용 차이 확인
 
 우선 **ApplicationContextConfig** 클래스를 약간 수정해보겠습니다.
 
@@ -396,6 +408,8 @@ public MemberRepository memoryMemberRepository() {
 이 해시값이 동일하다면 동일한 **개체(객체와 개체는 다른 의미입니다)** 일 것이고
 다르다면 서로 다른 개체일 것 입니다.
 
+---
+
 ##### @Configuration 적용 시
 
 먼저 **@Configuration** 이 적용된 **ApplicationContextConfig** 를 이용하여 아래와 같이 테스트해보겠습니다.
@@ -428,6 +442,8 @@ public class AnnotationConfigApplicationContextTest {
 
 실제로 테스트 코드를 돌려보면 출력되는 **두 emberRepository 객체의 해시값이 동일**하여 서로 **동일한 개체** 인 것을 확인할 수 있습니다.
 
+---
+
 ##### @Configuration 미적용 시
 
 그리고 나서 다음 테스트로는 **@Configuration** 을 제거한 후 테스트 코드를 실행해보겠습니다.
@@ -438,6 +454,10 @@ public class AnnotationConfigApplicationContextTest {
 
 테스트 코드 실행 전 설명했던 이유와 같이 **@Configuration** 을 사용할 경우 **프록시 패턴** 이 적용되며 **CGLIB** 가 동작하여 새로운 클래스를 생성하고 해당 클래스가 기존 **@Bean 메소드를 오버라이딩**하여 새로운 객체가 생성되는것을 방지해주지만 **@Configuration** 를 사용하지 않으면 테스트 코드 결과처럼 **프록시 패턴이 동작하지 않아 싱글톤이 적용되지 않습니다**
 
+---
+
 ### GenericGroovyApplicationContext
+
+---
 
 ### GenericXmlApplicationContext
