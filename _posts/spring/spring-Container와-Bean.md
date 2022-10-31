@@ -225,6 +225,10 @@ CGLIB 가 생성하는 클래스는 기존의 사용자가 정의한 **Applicati
 
 다시 정리해보면, Bean 객체 생성 시점에서 중간에 프로그램의 흐름을 가져와 **CglibApplicationContextConfig** 라는 별도의 클래스를 생성하고 해당 객체를 등록될 Bean과 갈아 끼워버리는 일종의 도둑질(?)을 하는 것 입니다. (해당 부분 실제로 코드를 분석한 것이 아니라 다를 수 있습니다. 내용이 달라질 경우 글을 수정하도록 하겠습니다.)
 
+실제로 저희가 **AnnotationConfigApplicationContext** 의 생성자 파라미터로 주입한 클래스 정보는 **ApplicationContextConfig.class** 이니 **ApplicationContextConfig** 객체가 빈으로 등록됬어야하는데, 실제로는 **CglibApplicationContextConfig** 객체가 빈으로 등록되는 것 입니다.
+
+실제로 **getBean()** 을 통하여 **ApplicationContextConfig Bean** 을 꺼내와서 객체 자체 toString() 해보면 웬걸? **CGLIB**이라는 이상한 텍스트가 낑겨있는 걸 확인할 수 있습니다. 바로 **CGLIB 라이브러리** 가 만든 **별도의 클래스**가 우리가 모르는 사이에 **Bean으로 등록된 것**이죠
+
 이렇게 어떤 기능 앞, 뒤로 뜬금없는 다른 기능을 끼워넣어서 실행시키는 것을 **프록시 패턴(Proxy Pattern)** 이라고 하며
 이 개념을 도입하여 개발하는 것을 **AOP(Aspect Oriented Programming, 관점 지향 프로그래밍)** 이라고 합니다.
 
