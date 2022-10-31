@@ -374,11 +374,12 @@ public MemberRepository memoryMemberRepository() {
 
 특별한 점은 호출되는 **memoryMemberRepository()** 는 **@Bean** 이라는 어노테이션을 통하여 Bean을 생성하는 메소드로 정의되었으니,
 스프링 컨테이너의 **싱글톤 패턴**에 따라 **memoryMemberRepository()** 로 생성되는 **MemoryMemberRepository** 객체는 **단 하나** 만 존재해야합니다.
+더 이상 **new를 이용한 객체 생성이 불가능** 해야 정상입니다.
 
 그렇기 때문에 **memberService** bean이 갖고 있는 **memoryMemberRepository** 와
 **orderService** bean이 갖고 있는 **memoryMemberRepository** 는 동일한 개체(객체 말고 개체입니다. 개체는 고유한 객체를 의미합니다.)여야할 것이 확실해보입니다.
 
-이를 검증하기 위하여 **memberService** 과 **orderService** 두 빈을 **getBean()**하여 꺼내온 후 각각 가지고있는 **memoryMemberRepository** 를 꺼내와 객체 
+이를 검증하기 위하여 **memberService** 과 **orderService** 두 빈을 **getBean()** 하여 꺼내온 후 각각 가지고있는 **memoryMemberRepository** 를 꺼내와 객체 
 객체 자체를 표준출력으로 보내면 toString() 이 호출되며 해당 개체의 해시값이 표시되는데
 이 해시값이 동일하다면 동일한 **개체(객체와 개체는 다른 의미입니다)** 일 것이고
 다르다면 서로 다른 개체일 것 입니다.
@@ -419,11 +420,11 @@ public class AnnotationConfigApplicationContextTest {
 
 그리고 나서 다음 테스트로는 **@Configuration** 을 제거한 후 테스트 코드를 실행해보겠습니다.
 
-실행 결과를 확인해보면 **두 emberRepository 객체의 해시값이 다른것** 임을 확인할 수 있습니다.
+실행 결과를 확인해보면 **두 memberRepository 객체의 해시값이 다른것** 임을 확인할 수 있습니다.
 
-결과적으로 저희가 예상했던대로 **@Configuration** 를 적용하면 **싱글톤 객체임이 보장** 되었고, **@Configuration** 를 사용하지 않을 경우 **Bean** 으로 등록되지만 같은 객체의 **Bean** 이 여러개 등록되는걸 확인했습니다.
+결과적으로 저희가 예상했던대로 **@Configuration** 를 적용하면 **싱글톤 객체임이 보장** 되었고, **@Configuration** 를 사용하지 않을 경우 **최초로 new 를 통해 생성된 MemoryMemberRepository 객체는 Bean 으로 등록되지만** 그 이후에 new 를 통해 생성된 MemoryMemberRepository 객체는 **단 하나의 객체만 생성되어야 한다** 라는 **싱글톤 법칙을 깨버리고** 새로운 객체를 생성하게된 것 입니다.
 
-위에 설명했던 이유와 같이 **@Configuration** 을 사용할 경우 **프록시 패턴** 이 적용되며 **CGLIB** 가 동작하여 새로운 클래스를 생성하고 해당 클래스가 새로운 객체가 생성되는것을 방지해줍니다.
+테스트 코드 실행 전 설명했던 이유와 같이 **@Configuration** 을 사용할 경우 **프록시 패턴** 이 적용되며 **CGLIB** 가 동작하여 새로운 클래스를 생성하고 해당 클래스가 기존 **@Bean 메소드를 오버라이딩**하여 새로운 객체가 생성되는것을 방지해주지만 **@Configuration** 를 사용하지 않으면 테스트 코드 결과처럼 **프록시 패턴이 동작하지 않아 싱글톤이 적용되지 않습니다**
 
 ### GenericGroovyApplicationContext
 
