@@ -227,10 +227,13 @@ CGLIB 가 생성하는 클래스는 기존의 사용자가 정의한 **Applicati
 
 실제로 저희가 **AnnotationConfigApplicationContext** 의 생성자 파라미터로 주입한 클래스 정보는 **ApplicationContextConfig.class** 이니 **ApplicationContextConfig** 객체가 빈으로 등록됬어야하는데, 실제로는 **CglibApplicationContextConfig** 객체가 빈으로 등록되는 것 입니다.
 
-실제로 **getBean()** 을 통하여 **ApplicationContextConfig Bean** 을 꺼내와서 객체 자체 toString() 해보면 웬걸? **CGLIB**이라는 이상한 텍스트가 낑겨있는 걸 확인할 수 있습니다. 바로 **CGLIB 라이브러리** 가 만든 **별도의 클래스**가 우리가 모르는 사이에 **Bean으로 등록된 것**이죠
+실제로 **getBean()** 을 통하여 **ApplicationContextConfig Bean** 을 꺼내와서 객체 자체 toString() 해보면 웬걸? **CGLIB**이라는 이상한 텍스트가 낑겨있는 걸 확인할 수 있습니다. 바로 **CGLIB 라이브러리** 가 만든 **별도의 클래스**를 말하는 것이죠.
 
 이렇게 어떤 기능 앞, 뒤로 뜬금없는 다른 기능을 끼워넣어서 실행시키는 것을 **프록시 패턴(Proxy Pattern)** 이라고 하며
 이 개념을 도입하여 개발하는 것을 **AOP(Aspect Oriented Programming, 관점 지향 프로그래밍)** 이라고 합니다.
+
+> **여기서 잠깐! 이게 말이되는건가?!**
+> 우리가 보고있는 이 행위는 소스코드가 컴파일 된 후 실행 단계인 **런타임 단계**에서 이미 컴파일 단계에서 생성되어진 **java 바이트코드** 에 접근하여 수정하는 마법 같은 작업입니다. 이게 가능한 이유는 **java의 특징인 리플렉션(reflection)** 때문인데 이에 대한 더 자세한 정보는 나중에 시간을 마련하여 공부를 한 후 포스팅을 진행하겠습니다.
 
 이 **프록시 패턴** 이 **@Configuration** 이 존재해야지만 작동하게 되는데, 실제로 **@Configuration** 가 있고, 없고의 차이를 동일한 클래스로 두번 이상 **Bean 등록을 시도**하여 등록된  **동일한 Bean 객체** 인지, 아니면 **별도의 객체**인지 비교를 통하여 확인해보겠습니다.
 
