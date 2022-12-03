@@ -4,7 +4,7 @@
     <article><section class="post-content"><p>There are no blog posts</p></section></article>
     {% endunless %}
     {% for post in paginator.posts %}
-      {% unless post.tags contains "note" %}
+      {% unless post.tags contains "note" or post.tags contains "temp"%}
       <div class="post-teaser">
           {% if post.thumbnail %}
           <div class="post-img">
