@@ -6,6 +6,7 @@
     {% for post in paginator.posts %}
       {% unless post.tags contains "note" or post.tags contains "temp"%}
       <div class="post-teaser">
+
           {% if post.thumbnail %}
           <div class="post-img">
               <a aria-label="{{ post.title }}" href="{{ post.url | relative_url }}">
@@ -20,7 +21,7 @@
                   {{ post.title }} 
                 </a>
               </h1>
-              {% include blog/post_info.liquid author=post.author date=post.date %}
+              {% include blog/post_info.liquid author=post.author date=post.date skills=post.skills %}
             </header>
             {% if site.excerpt or site.theme_settings.excerpt %}
                 <div class="excerpt">

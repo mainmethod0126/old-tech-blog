@@ -2,6 +2,7 @@
 layout: post
 title: Spring MVC
 tags: [spring]
+skills: [spring, java]
 author: mainmethod0126
 excerpt_separator: <!--more-->
 ---

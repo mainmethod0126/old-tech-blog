@@ -1,7 +1,8 @@
 ---
 layout: post
 title: Spring-BeanFactory와-ApplicationContext(미완성)
-tags: [spring]
+tags: [spring, temp]
+skills: [spring, java]
 author: mainmethod0126
 excerpt_separator: <!--more-->
 ---

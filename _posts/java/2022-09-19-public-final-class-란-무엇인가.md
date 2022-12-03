@@ -2,6 +2,7 @@
 layout: post
 title: public final class 란 무엇인가?
 tags: [java]
+skills: [java]
 author: mainmethod0126
 excerpt_separator: <!--more-->
 ---

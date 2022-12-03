@@ -1,15 +1,25 @@
 {% assign author = site.data.authors[include.author] %}
 {% assign date = include.date | default: "today" | date: "%B %-d, %Y" %}
+{% assign skills = include.skills %}
+{% assign skillIcons = site.data.skill_icons %}
+
 
 <div class="post-info">
   {%- if author.url -%}<a href="{{ author.url | relative_url }}" target="_blank" rel="noopener">{%- endif -%}
     {% if author.avatar  %}
       <img alt="Author's avatar" src="{{ author.avatar | relative_url }}">
     {% endif %}
-    <p class="meta">
+    <p class="meta" style="margin: 0px 12px 0px 0px;">
       {% if author.name %}{{ author.name }} - {% endif %}
       {% assign x = date | date: "%m" | minus: 1 %}
       {{ site.data.language.str_months[x] | default: date | date: "%B" }} {{ date | date: "%d, %Y" }}
     </p>
+    {% for skill in skills  %}
+      <div style="margin: 0px 0px 0px 0px;" class="skill-icon">
+        <img title={{ skill }} alt={{ skill }} src="{{ skillIcons[skill] }}">
+      </div>
+    {% endfor  %}
+
   {%- if author.url -%}</a>{%- endif -%}
 </div>
+
