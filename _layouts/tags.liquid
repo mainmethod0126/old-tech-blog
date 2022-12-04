@@ -63,7 +63,7 @@ layout: page
                 <a href="{{ post.url | relative_url }}">
                     <i class="far fa-file-alt" aria-hidden="true"></i>
                     {% if post.tags contains "note" %}
-                        {{ post.title }} {{'(Note for myself)'}}
+                        {{ post.title }} {{'(Note for me)'}}
                     {% elsif post.tags contains "temp" %}
                         {{ post.title }} {{'(Temporarily Stored)'}}
                     {% else %}
