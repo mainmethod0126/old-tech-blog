@@ -62,9 +62,14 @@ layout: page
             <h5 class="tag-title">
                 <a href="{{ post.url | relative_url }}">
                     <i class="far fa-file-alt" aria-hidden="true"></i>
-                    {{ post.title }}
+                    {% if post.tags contains "note" %}
+                        {{ post.title }} {{'(Note for me)'}}
+                    {% elsif post.tags contains "temp" %}
+                        {{ post.title }} {{'(Temporarily Stored)'}}
+                    {% else %}
+                        {{ post.title}}
+                    {% endif %}
                 </a>
-
                 {% include blog/post_info.liquid date=post.date %}
             </h5>
             {% endif %}
