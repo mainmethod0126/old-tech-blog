@@ -1,7 +1,7 @@
 ---
 layout: post
 title: vue project build시에 발생한 BABEL관련 오류 해결해보기.md
-tags: [vue]
+tags: [vue, temp]
 skills: [vue]
 author: mainmethod0126
 excerpt_separator: <!--more-->
@@ -148,12 +148,9 @@ module.exports = {
   overrides: [
     {
       test: /node_modules\/vuetify\/dist\/vuetify.js/,
-      // or test: /vuetify.js/, if vuetify.js is in your project's root directory
       options: {
         transpileOnly: true,
-        // increase the size limit to a value larger than 500KB
         // for example: 1MB = 1000000, 2MB = 2000000, etc.
-        // you can adjust this value as needed
         transpileSizeLimit: 1000000,
       },
     },
@@ -163,10 +160,17 @@ module.exports = {
 
 추가된 각각의 옵션들은 아래 의미를 갖습니다.
 
-- overrides : 파일 또는 디렉토리에 각각 다른 babel 구성을 지정하도록 해줍니다.
-- test : babel 에서 변환해야 하는 파일을 결정하는 정규식 또는 정규식 배열을 지정합니다.
-- 
+- **overrides** : 파일 또는 디렉토리에 각각 다른 babel 구성을 지정하도록 해줍니다.
+- **test** : babel 에서 변환해야 하는 파일을 결정하는 정규식 또는 정규식 배열을 지정합니다.
+- **options** : 이 옵션을 사용하면 Babel이 실행될 때 전달될 추가 옵션을 지정할 수 있습니다. 이러한 옵션에는 JavaScript의 소스 및 대상 버전, 생성할 소스 맵의 유형, 출력에 주석을 포함할지 여부 등이 포함될 수 있습니다.
+- **transpileOnly** : 이 옵션은 Babel이 코드를 트랜스파일만 하고 다른 변환(예: 출력 최적화)을 수행하지 않도록 지정합니다.
+- **transpileSizeLimit** : 저희가 원하는 옵션입니다. Babel에서 변환해야 하는 파일의 최대 크기(바이트)를 지정합니다. 파일이 이 크기를 초과하면 건너뛰고 변환되지 않습니다. 이는 변환할 필요가 없는 큰 파일을 건너뛰어 빌드 시간을 최적화하는 데 유용할 수 있습니다.
+ 
+여기서 핵심은 `transpileSizeLimit` 입니다 용량 제한을 변경할 수 있도록 해주는 옵션이기에 저희가 원하는 바와 딱 일치합니다.
 
+저희가 원했던 사이즈는 1000kb 즉 1000000byte 입니다.
+
+위와 같은 옵션을 그대로 적용하면 저희 제한 1000kb로 기존 500kb에서 발생했던 오류가 발생하지 않게됩니다.
 
 
 
