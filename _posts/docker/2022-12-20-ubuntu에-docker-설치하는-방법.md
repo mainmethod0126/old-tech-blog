@@ -1,0 +1,60 @@
+---
+layout: post
+title: ubuntu에 docker 설치하는 방법
+tags: [docker, temp, note]
+skills: [docker]
+author: mainmethod0126
+excerpt_separator: <!--more-->
+---
+
+# 서론
+
+우분투에 도커 설치법을 알아봅니다.
+
+<!--more-->
+
+## 도커 설치하기
+
+### 패키지 관리자 색인을 업데이트합니다
+
+```shell
+sudo apt update
+```
+
+### apt가 HTTPS를 통해 리포지토리를 사용할 수 있도록 패키지를 설치합니다
+
+```shell
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+```
+
+### 공식 Docker 리포지토리의 GPG 키를 시스템에 추가합니다
+
+```shell
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+```
+
+### APT 소스에 Docker 리포지토리를 추가합니다
+
+```shell
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+```
+
+### 패키지 관리자 색인을 업데이트합니다
+
+```shell
+sudo apt update
+```
+
+### 도커 설치
+
+```shell
+sudo apt install docker-ce
+```
+
+### Docker 데몬이 실행 중인지 확인합니다
+
+```shell
+sudo systemctl status docker
+```
+
+Docker 데몬이 실행 중임을 나타내는 메시지가 표시되어야 합니다
