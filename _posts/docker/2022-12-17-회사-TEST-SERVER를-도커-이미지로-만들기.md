@@ -51,3 +51,80 @@ Dockerfile은 웹 서버 시작 또는 스크립트 실행과 같이 `이미지�
 FROM centos:7.1908
 ```
 
+---
+## 아래부터는 임시 작성 부분입니다.
+
+
+### 도커파일
+
+```dockerfile
+FROM centos:7.7.1908
+
+# Install Elasticsearch
+RUN yum -y install wget
+RUN wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.8.1-x86_64.rpm
+RUN yum -y install elasticsearch-7.8.1-x86_64.rpm
+
+# Add Nginx Repo
+RUN yum -y install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+
+RUN yum -y update
+
+# Install NGINX
+RUN yum -y install nginx
+
+# Add user with sudo privileges
+RUN adduser --uid 1000 softcamp
+RUN echo "softcamp:softcamp123!@#" | chpasswd
+RUN echo "softcamp ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+```
+
+### dockerfiles 저장 경로
+
+/opt/dockerfiles
+
+왜? opt 디렉토리는 optional 의 약자로 운영체제 시스템과는 별도의 서비스를 설치할때 사용하는 디렉토리입니다.
+일반적으 root가 소유권을 갖으면 다른 사용자는 읽기/실행만을 허용합니다.
+
+도커파일 빌드
+
+빌드할 도커파일이 있는 경로로 현재 디렉토리를 이동시킨 후
+
+```bash
+sudo docker build -t sk-hynix-pre-release-test .
+```
+
+
+### 도커볼륨 관리하는 디렉토리
+
+nas 를 마운팅하여 볼륨 관리를 진행하려합니다.
+
+nas의 경로는 //10.30.10.177/dxl/docker/volumes/pre-release 입니다.
+
+nas 마운팅을 위해 cifs 를 먼저 설치합니다.
+
+```bash
+sudo apt install cifs-utils
+```
+
+```bash
+sudo mount -t cifs //10.30.10.177/dxl/docker/volumes/pre-release /var/lib/docker/volumes
+```
+
+부팅시 자동 마운트를 위하여 /etc/fstab 에 아래와 같은 내용을 추가합니다.
+
+```bash
+//10.30.10.177/dxl/docker/volumes/pre-release /var/lib/docker/volumes/pre-release cifs 0 0
+```
+
+여기까지 마운트는 성공적으로 이뤄지는걸 확인함.
+
+이제 고객사 이름의 폴더 내부에 있는 각각의 폴더를 정해진 위치에 마운팅하여 사용하도록 컨테이너를 실행해야함.
+
+```bash
+sudo docker run --log-driver=json-file \
+  -v /var/lib/docker/volumes/pre-release/sk-hynix/elasticsearch-7.8.1:/home/softcamp/elasticsearch-7.8.1 \
+  -v /var/lib/docker/volumes/pre-release/sk-hynix/gatexcanner:/home/softcamp/GateXcanner \
+  -v /var/lib/docker/volumes/pre-release/sk-hynix/GateXcannerApiSvr:/home/softcamp/GateXcannerApiSvr \
+  sk-hynix-pre-release-test
+```
