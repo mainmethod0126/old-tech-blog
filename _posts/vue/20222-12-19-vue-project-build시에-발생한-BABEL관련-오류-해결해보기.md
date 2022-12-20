@@ -1,7 +1,7 @@
 ---
 layout: post
 title: vue project build시에 발생한 BABEL관련 오류 해결해보기.md
-tags: [vue, temp]
+tags: [vue, temp, debug]
 skills: [vue]
 author: mainmethod0126
 excerpt_separator: <!--more-->
@@ -97,85 +97,17 @@ var Rectangle = /*#__PURE__*/function () {
 The code generator has deoptimised the styling of /home/vsts/work/1/s/node_modules/vuetify/dist/vuetify.js as it exceeds the max of 500KB.
 ```
 
-> "vuetify.js 가 500KB를 초과해서 스타일 최적화를 진행하지 않았어."
+> "vuetify.js 가 500KB를 초과해서 스타일 최적화를 진행하지 않을게."
 
-이제 무슨 말인지 이해가 좀 됩니다. Babel을 통하여 최신 문법의 js를 구버전 브라우저에서 사용할 수 있도록 최적화를 진행해야하는데, vuetify.js라는 특정 파일의 용량이 크기 때문에 이를 진행하지 않았다. 라는 말인 것 같습니다.
+아~ **"용량이커서 컴파일 과정에서 스타일 관련 최적화를 스킵했다"** 라고 읽힙니다.
 
-vuetify.js 는 구브라우저에 호환되는 코드가아닌 기존의 문법을 그대로 간직하기 때문에 구브라우저에서는 오류를 발생할 가능성이 높아집니다.
+여기서 스타일은 `CSS`를 의미합니다.
 
-그럼 해결 방법을 생각해 봅시다.
+다시 말해 용량이 기준보다 커 `CSS`코드의 최적화를 진행하지 않았다 라는 말입니다.
 
-### 해결 방법
+위 경고로 인해 javascript 구문이 정상 동작하지 않거나 하진 않기 때문에 무시가 가능한 경고입니다.
 
-단편적으로 위 문제를 해결할 방법은 아래와 같습니다.
-
-1. 500kb 라는 `용량 제한을 더 높이거나 아예 제한을 없앤다`.
-2. vuetify.js 의 `코드를 줄여 500kb 이하`로 만든다.
-
-자 두 방법 다 확인해 보도록 하겠습니다.
-
-#### BABEL 용량 제한 변경
-
-자 우리의 vuetify.js 가 `500kb`라는 제한을 넘었으니 문제가 발생한거니 `500kb` 를 2배인 `1000kb` 늘려 봅시다. (용량 제한으로 해결되는 것을 확인하는 것이 우선이기 때문에 일단 무지성으로 변경해봅니다)
-
-진행하기 전에 잠깐! `주의점`이 존재합니다. 바로 `컴파일 시간의 증가`입니다.
-
-용량이 큰 파일이라하면 분명 더 많은 코드를 포함하고 있을 것이고 이 많은 코드를 컴파일 하기 위해서 분명 `컴파일 시간이 증가`하는 이슈가 발생할 것 입니다.
-
-근본적인 해결은 소스 코드를 줄이는 것 입니다.
-
-소스코드의 용량이 크다는 것은 분명 불필요한 코드 또는 모듈화되지 않은 코드, 중복되는 코드가 존재할 가능성이 높다는 것이기 때문에 이를 충분히 검토 후 진행하실 것을 추천드립니다.
-
-babel 용량 제한을 변경하기 위해서는 `babel.config.js` 파일을 수정해야합니다.
-
-아래는 현재 사용되고있는 `babel.config.js` 파일입니다.
-
-```js
-module.exports = {
-  presets: [
-    ['@vue/app', { useBuiltIns: 'entry' }],
-  ],
-}
-```
-
-위 설정파일에 크기 제한을 변경하는 설정을 추가하면 아래와 같이 변경됩니다.
-
-```js
-module.exports = {
-  presets: [
-    ['@vue/app', { useBuiltIns: 'entry' }],
-  ],
-  overrides: [
-    {
-      test: /node_modules\/vuetify\/dist\/vuetify.js/,
-      options: {
-        transpileOnly: true,
-        // for example: 1MB = 1000000, 2MB = 2000000, etc.
-        transpileSizeLimit: 1000000,
-      },
-    },
-  ],
-}
-```
-
-추가된 각각의 옵션들은 아래 의미를 갖습니다.
-
-- **overrides** : 파일 또는 디렉토리에 각각 다른 babel 구성을 지정하도록 해줍니다.
-- **test** : babel 에서 변환해야 하는 파일을 결정하는 정규식 또는 정규식 배열을 지정합니다.
-- **options** : 이 옵션을 사용하면 Babel이 실행될 때 전달될 추가 옵션을 지정할 수 있습니다. 이러한 옵션에는 JavaScript의 소스 및 대상 버전, 생성할 소스 맵의 유형, 출력에 주석을 포함할지 여부 등이 포함될 수 있습니다.
-- **transpileOnly** : 이 옵션은 Babel이 코드를 트랜스파일만 하고 다른 변환(예: 출력 최적화)을 수행하지 않도록 지정합니다.
-- **transpileSizeLimit** : 저희가 원하는 옵션입니다. Babel에서 변환해야 하는 파일의 최대 크기(바이트)를 지정합니다. 파일이 이 크기를 초과하면 건너뛰고 변환되지 않습니다. 이는 변환할 필요가 없는 큰 파일을 건너뛰어 빌드 시간을 최적화하는 데 유용할 수 있습니다.
- 
-여기서 핵심은 `transpileSizeLimit` 입니다 용량 제한을 변경할 수 있도록 해주는 옵션이기에 저희가 원하는 바와 딱 일치합니다.
-
-저희가 원했던 사이즈는 1000kb 즉 1000000byte 입니다.
-
-위와 같은 옵션을 그대로 적용하면 저희 제한 1000kb로 기존 500kb에서 발생했던 오류가 발생하지 않게됩니다.
-
-
-
-
-
+### 두번째 경고
 
 ```js
 chunk kiosk~ndaLogs [mini-css-extract-plugin]
@@ -187,4 +119,23 @@ despite it was not able to fulfill desired ordering with these modules:
    - while fulfilling desired order of chunk group(s) kiosk
 ```
 
-위 경고는 
+위 경고에서는 `Conflicting` 이라는 키워드가 눈에 띄입니다
+
+해당 키워드를 번역해보면 `서로 싸우는` 라는 의미로 번역되는데.
+
+추가되는 내용을 보면 느낌적인 느낌으로 모듈간의 충돌이 발생한 것 같습니다.
+
+또다른 키워드로는 `chunk` 라는 키워드를 볼 수 있는데, 단순하게 사전적 의미로는 `하나의 큰 덩어리` 를 의미합니다.
+
+예를 들어 이사를 위해 많은 짐들을 옮겨야하는 상황에서 몇개의 박스 단위로 짐들을 나눠 담을때 이 하나의 박스를 `chunk` 라고 칭할 수 있습니다.
+
+이런 chunk가 현재 경고에는 webpack에서 쓰이는 chunk 를 의미하는데, 프론트 엔드 개발 기반 지식 없는 본인을 위해서라도 `webpack` 에 대하여 잠시 짚고 넘어가겠습니다.
+
+### Webpack
+
+#### bundle
+
+webpack을 이해하기 위해서는 bundle에 대한 개념이 있어야합니다.
+
+`bundle`은 웹 애플리케이션 또는 기타 클라이언트 측 코드에 필요한 모든 코드와 리소스를 포함하는 단일 파일 또는 소수의 파일입니다. 
+
