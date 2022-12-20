@@ -122,9 +122,11 @@ sudo mount -t cifs //10.30.10.177/dxl/docker/volumes/pre-release /var/lib/docker
 이제 고객사 이름의 폴더 내부에 있는 각각의 폴더를 정해진 위치에 마운팅하여 사용하도록 컨테이너를 실행해야함.
 
 ```bash
-sudo docker run --log-driver=json-file \
+sudo docker run -it --log-driver=json-file \
   -v /var/lib/docker/volumes/pre-release/sk-hynix/elasticsearch-7.8.1:/home/softcamp/elasticsearch-7.8.1 \
   -v /var/lib/docker/volumes/pre-release/sk-hynix/gatexcanner:/home/softcamp/GateXcanner \
   -v /var/lib/docker/volumes/pre-release/sk-hynix/GateXcannerApiSvr:/home/softcamp/GateXcannerApiSvr \
   sk-hynix-pre-release-test
 ```
+
+컨테이너 실행까지는 성공하였으나 마운팅이 이뤄지지 않은 로그 확인 후 분석 필요
