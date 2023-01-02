@@ -13,6 +13,8 @@ JDBC 를 사용한 계기가 있어 DataSource,Connection,Statement,Savepoint �
 
 <!--more-->
 
+---
+
 ## JDBC를 이용한 쿼리 사용 예시
 
 JDBC를 이용하여 쿼리를 사용하기 위해서는 아래와 같은 예시를 들어볼 수 있습니다.
@@ -71,6 +73,8 @@ public class TransactionExample {
 
 자 위 코드를 베이스로 몇가지 키워드에 대하여 알아보겠습니다.
 
+---
+
 ## DataSource
 
 ```java
@@ -97,6 +101,8 @@ dataSource.setPassword("password");
 
 위와 같이 등록하고 전역 객체를 활용하는 방식으로 사용됩니다.
 
+---
+
 ## Connection
 
 ```java
@@ -112,6 +118,8 @@ dataSource 에 정의되어있는 DB 정보를 토대로 커넥션을 생성하�
 
 보통 하나의 트랜잭션에 하나의 Connection 를 생성하고 동일한 트랙잭션 내에서는 Connection를 인자로 넘기면서 공통으로 사용하게 됩니다.
 
+---
+
 ## Statement
 
 ```java
@@ -125,6 +133,8 @@ Statement 객체는 쿼리를 실행하고, 결과를 저장하고 확인할 수
 
 보통 재활용되지 않고 쿼리 실행이 필요할 경우에 바로바로 생성하여 사용합니다.
 그 이유는 쿼리 결과를 다중으로 저장하지 않고 직접 쿼리 결과만 저장하기 때문입니다.
+
+---
 
 ## Savepoint
 
