@@ -60,18 +60,11 @@ FROM centos:7.1908
 ```dockerfile
 FROM centos:7.7.1908
 
-# Install Elasticsearch
-RUN yum -y install wget
-RUN wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.8.1-x86_64.rpm
-RUN yum -y install elasticsearch-7.8.1-x86_64.rpm
+# Install MariaDB
+RUN yum -y install mariadb-server mariadb
 
-# Add Nginx Repo
-RUN yum -y install http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
-
-RUN yum -y update
-
-# Install NGINX
-RUN yum -y install nginx
+# Start MariaDB and set it to start on boot
+RUN systemctl start mariadb && systemctl enable mariadb
 
 # Add user with sudo privileges
 RUN adduser --uid 1000 softcamp
@@ -130,3 +123,41 @@ sudo docker run -it --log-driver=json-file \
 ```
 
 컨테이너 실행까지는 성공하였으나 마운팅이 이뤄지지 않은 로그 확인 후 분석 필요
+
+### 2023-01-04 알게된 정보
+
+- docker run 은 해당 이미지에다가 무엇을 실행시켜라 라는 명령을 내리는 것 뿐. 해당 명령이 완료성 명령이면 컨테이너가 켜졌다가 명령 완료 후 바로 꺼진다.
+
+- docker 컨테이너 실행 상태를 유지하기 위해서는 지속적으로 실행되는 서비스를 run 명령어의 인자로 실행 시켜야한다.
+예를들어
+
+```bash
+ docker run -d --name my-ctn my-image /my-back-end-service
+```
+
+- docker run 으로 /bin/bash 실행 후 컨테이너를 실행 상태로 유지하고 호스트 터미널로 빠져나오려면 ctrl + p + q 를 이용해야한다.
+예를 들어
+
+```bash
+  docker run -it --name my-ctn my-image /bin/bash
+```
+
+로 실행 시키고 호스트 빠져 나올땐
+**ctrl + p + q** 키보드 버튼으로 빠져나오고
+차후에 다시 해당 컨테이너의 bash를 사용하려면
+
+```bash
+  docker attach my-ctn
+```
+
+위 방법으로 다시 bash 에 붙을 수 있다
+
+#### 호스트에 있는 파일을 컨테이너에 옮기는 방법
+
+먼저 컨테이너가 실행중이여야하며, 컨테이너가 실행중이라면
+
+```bash
+  docker cp <호스트에 존재하는 파일 경로> <타겟 컨테이너 이름>:<컨테이너 내부에 복사된 파일이 위치할 경로>
+```
+
+위 방법으로 파일 복사가 가능하다.
