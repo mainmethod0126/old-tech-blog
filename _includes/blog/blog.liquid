@@ -4,7 +4,7 @@
       <section class="post-content"><p>There are no blog posts</p></section>
     </article>
   {% endunless %}
-  {% assign filtered_posts = paginator.posts | where: 'post', 'tags', 'note', 'temp', 'incomplete' %}
+  {% assign filtered_posts = paginator.posts | where: 'tags', 'note', 'temp', 'incomplete' %}
   {% for post in filtered_posts %}
     {% unless post.tags contains "note" or post.tags contains "temp" % or post.tags contains "incomplete" %}
       <div class="post-teaser">
