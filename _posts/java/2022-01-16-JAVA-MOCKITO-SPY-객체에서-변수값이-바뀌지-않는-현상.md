@@ -1,6 +1,6 @@
 ---
 layout: post
-title: JAVA 메모리 누수 이슈 분석
+title: JAVA MOCKITO SPY 객체에서 변수값이 바뀌지 않는 현상
 tags: [java, temp, note]
 skills: [java]
 author: mainmethod0126
