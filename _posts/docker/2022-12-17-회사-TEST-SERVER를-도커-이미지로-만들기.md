@@ -167,3 +167,12 @@ sudo docker run -it --log-driver=json-file \
 컨테이너에서 systemctl 을 사용하려하면 **Failed to get D-Bus connection: Operation not permitted** 이라는 에러가 발생합니다.
 
 이를 해결하는 방법들을 찾아보면 **--privileged** 같은 방법을 알려주는 곳이 종종 있는데 이 옵션을 쓸 경우 컨테이너를 통하여 호스트 os에 침범할 수 있는 보안취약점이 생길 수 있어 사용하면 안됩니다.
+
+#### 도커 컨테이너에서 nginx 백그라운드로 실행시키기
+
+
+
+
+```bash
+nginx start
+```
