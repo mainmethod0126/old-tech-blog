@@ -77,18 +77,34 @@ VM 생성은 OS를 직접 설치하게됩니다. 컴퓨터 OS를 직접 설치�
 
 ---
 
-이제 GateXcanner 제품을 어떻게 도커로 설계했는지 보여드리겠습니다.
-
 ## GateXcanner 고객사별 테스트 환경 자동화 아키텍처
 
 ![picture 3](../../images/4584fbdc83730070ce6323abdbf2ddb29700f69e8cf0bd58a691a3b9a21a3285.png)  
 
-- **Developer** : 소스코드를 수정하게되는 개발자입니다. GitRepo 에 본인이 수정한 소스코드를 **PR(PullRequest)** 합니다.
-- **GitRepo** : 소스코드 관리를 위한 AzureDevOps 프로젝트별 소스코드 저장소입니다. 버전 및 변경 이력등을 저장할 수 있습니다.
-- **Pipelines & Release Pipeline** : Azure DevOps의 Pipeline은 소프트웨어 개발 및 배포 프로세스를 자동화하는 CI/CD(Continuous Integration/Continuous Deployment) 툴입니다. Pipeline을 사용하면 소스 코드 변경 사항을 자동으로 빌드하고, 테스트하고, 배포할 수 있습니다. 여기서 **빌드**와 **배포** 개념을 분리한 두 가지 유형의 Pipeline이 존재하는데 **빌드 : pipeline** 과 **배포 : ReleasePipeline** 이 있습니다.
-- **Pipelines** : **빌드** 전용 파이프라인 입니다. 소스코드를 가져와 컴파일, 빌드 및 테스트를 수행합니다. 개발자들이 새로운 코드를 작성할 때마다 자동으로 빌드를 수행하여 릴리스를 준비하며, 일반적으로 CI(Continuous Integration) Pipeline입니다.
-- **Release Pipeline** : **배포** 전용 파이프라인 입니다. **Pipeline 에서 생성된 빌드 아티팩트**들을 가져와서 릴리스 및 배포할 수 있습니다. 이 Pipeline은 일반적으로 DevOps 엔지니어, 운영팀 또는 릴리스 매니저 등이 사용하는 CD(Continuous Deployment) Pipeline입니다.
-- **ACR(Azure Container Registry)** : Microsoft Azure에서 제공하는 완전 관리형 컨테이너 이미지 레지스트리 서비스입니다. 도커 이미지 관리용이라고 보시면 되겠습니다.
-- **Self hosted Agent** : Self-hosted agent는 조직의 **서버, 가상 머신 또는 컨테이너**에서 실행되는 Azure Pipelines agent입니다. Self-hosted agent는 조직의 네트워크에서 빌드 및 배포 작업을 수행하므로 클라우드 기반 빌드 및 배포 서비스를 사용할 수 없는 경우에도 사용할 수 있습니다.
-- **Tester** : ACR에 존재하는 고객사별 이미지를 이용하여 테스트 작업을 진행하는 인원입니다.
-- **Dev test server** : 개발 단계에서 테스트를 진행하기 위한 테스트 서버입니다. 고객사별 도커 컨테이너를 항상 실행상태로 유지하여 언제든 테스트가 가능하도록 합니다.
+### 용어 설명
+
+- **`Developer`** : 소스코드를 수정하게되는 개발자입니다. GitRepo 에 본인이 수정한 소스코드를 **PR(PullRequest)** 합니다.
+- **`GitRepo`** : 소스코드 관리를 위한 AzureDevOps 프로젝트별 소스코드 저장소입니다. 버전 및 변경 이력등을 저장할 수 있습니다.
+- **`Pipelines & Release Pipeline`** : Azure DevOps의 Pipeline은 소프트웨어 개발 및 배포 프로세스를 자동화하는 CI/CD(Continuous Integration/Continuous Deployment) 툴입니다. Pipeline을 사용하면 소스 코드 변경 사항을 자동으로 빌드하고, 테스트하고, 배포할 수 있습니다. 여기서 **빌드**와 **배포** 개념을 분리한 두 가지 유형의 Pipeline이 존재하는데 **빌드 : pipeline** 과 **배포 : ReleasePipeline** 이 있습니다.
+- **`Pipelines`** : **빌드** 전용 파이프라인 입니다. 소스코드를 가져와 컴파일, 빌드 및 테스트를 수행합니다. 개발자들이 새로운 코드를 작성할 때마다 자동으로 빌드를 수행하여 릴리스를 준비하며, 일반적으로 CI(Continuous Integration) Pipeline입니다.
+- **`Release Pipeline`** : **배포** 전용 파이프라인 입니다. **Pipeline 에서 생성된 빌드 아티팩트**들을 가져와서 릴리스 및 배포할 수 있습니다. 이 Pipeline은 일반적으로 DevOps 엔지니어, 운영팀 또는 릴리스 매니저 등이 사용하는 CD(Continuous Deployment) Pipeline입니다.
+- **`ACR(Azure Container Registry)`** : Microsoft Azure에서 제공하는 완전 관리형 컨테이너 이미지 레지스트리 서비스입니다. 간단하게 도커 이미지 관리용이라고 보시면 되겠습니다.
+- **`Self hosted Agent`** : Self-hosted agent는 조직의 **서버, 가상 머신 또는 컨테이너**에서 실행되는 Azure Pipelines agent입니다. Self-hosted agent는 조직의 네트워크에서 빌드 및 배포 작업을 수행하므로 클라우드 기반 빌드 및 배포 서비스를 사용할 수 없는 경우에도 사용할 수 있습니다.
+- **`Tester`** : ACR에 존재하는 고객사별 이미지를 이용하여 테스트 작업을 진행하는 인원입니다.
+- **`Dev test server`** : 개발 단계에서 테스트를 진행하기 위한 테스트 서버입니다. 고객사별 도커 컨테이너를 항상 실행상태로 유지하여 언제든 테스트가 가능하도록 합니다.
+
+### 일반 사용자별 역할
+
+- **`개발자`** : 소스코드를 수정하는 개발자입니다. 소스코드가 수정이 완료되면 **Git Repo의 Main branch** 로 **PR**을 요청합니다. PR 시점에서 자동으로 **Build Validation pipeline** 이 동작합니다.
+
+- **`PR 관리자`** : 개발자가 요청한 **PR** 에 대하여 **Build Validation pipeline** 이 정상적으로 통과되었는지, 소스코드의 품질에 이상이 없는지를 판단한 후 **Approval** 합니다. **Approval** 되면 자동으로 **Artifact 생성을 위한 Build pipeline** 과 **Release Pipeline** 이 동작합니다.
+
+- **`테스터`** : **Release Pipeline** 이 정상적으로 완료되면 **ACR**에 이미지가 업로드 될 텐대, **Dev test server** 에서 테스트가 필요한 고객사별 이미지를 다운하여 컨테이너를 실행하고. 해당 컨테이너 환경에서 테스트를 진행합니다. 테스트가 정상적으로 완료된 후 문제가 없다면 배포를 승인하거나 또는 **pre-release(위 글에서는 다루지 않습니다)** 환경에서 다시 한번 테스트를 진행합니다.
+
+---
+
+## Pipeline 관리
+
+예를들어 고객사 및 Git Repo 또는 Base DockerImage의 변경 등이 이뤄졌을 경우 기존 Pipeline의 수정이 이뤄져야합니다. 해당 작업은 **DevOps Engineer** 가 담당하게되는 역할이며 아래는 GateXcanner 의 Pipeline을 수정하게되는 경우에 대한 몇가지 예시와 방법입니다.
+
+### 신규 고객사 추가
