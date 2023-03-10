@@ -1,6 +1,6 @@
-# GateXcanner 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 설명
+# GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 설명
 
-안녕하세요? 신우섭입니다.
+안녕하세요? 제품개발 1팀에서 웹 백엔드 포지션으로 근무중인 신우섭입니다.
 
 온프레미스 제품에 대하여 고객사별 테스트 환경을 구축해본 경험과 GateXcanner 제품 관련 업무를 맡는 분들에게 가이드를 드리고자 글을 작성하였습니다.
 
@@ -109,6 +109,54 @@ VM 생성은 OS를 직접 설치하게됩니다. 컴퓨터 OS를 직접 설치�
 
 ## Pipeline 관리
 
-예를들어 고객사 및 Git Repo 또는 Base DockerImage의 변경 등이 이뤄졌을 경우 기존 Pipeline의 수정이 이뤄져야합니다. 해당 작업은 **DevOps Engineer** 가 담당하게되는 역할이며 아래는 GateXcanner 의 Pipeline을 수정하게되는 경우에 대한 몇가지 예시와 방법입니다.
+예를들어 신규 고객사 및 신규 Git Repo 또는 Base DockerImage의 변경 등이 이뤄졌을 경우 기존 Pipeline의 수정이 이뤄져야합니다. 해당 작업은 **DevOps Engineer** 가 담당하게되는 역할이며 아래는 GateXcanner 의 Pipeline을 수정하게되는 경우에 대한 몇가지 예시와 방법입니다.
+
 ### 신규 고객사 추가
 
+Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추가입니다.
+
+먼저 고객사가 추가될 경우 **"Release pipeline"** 을 수정해야합니다.
+
+#### ims-docker-image-release 수정
+
+도커 이미지를 만들어내는 **"Release pipeline"** 의 이름은 **ims-docker-image-release** 입니다.
+이 **ims-docker-image-release** 를 수정해야합니다.
+
+![picture 6](../../images/8441e45a6a3ceafc4b713c58e11cb7cd67a721942237c10ca69007c9328aa1ad.png)  
+
+#### 신규 고객사의 "Stage" 추가
+
+고객사의 추가는 **"Release pipeline"** 의 **Stage**추가로 이어집니다.
+**고객사와 Stage는 1:1 맵핑**입니다 이 점을 주의해주세요
+
+> **잠깐! Stages 란?**
+> pipeline에서 **stages**는 파이프라인을 여러 단계로 구성하는 경우에 사용됩니다. 논리적인 단계로 일련의 관련된 작업 집합을 의미합니다. 이 말이 좀 어려울 수 있는데 예를 들어 **Build, Test, Deploy** 들이 각각 관련된 하나의 작업 집합으로 표현될 수 있습니다.
+> 저는 이 stage를 "조직(고객사)"라는 좀 큰 범위로 묶었습니다.
+
+![picture 8](../../images/4842a1c876592b47c867a63c9fee9ac5d95802551b331bef25fe5160a8417830.png)
+![picture 10](../../images/3550dbdfc138f206debaf64c91436faf97566126e76a19aeef1049d7a4e9cd71.png)  
+![picture 11](../../images/bc7bda96d15a2cb4abd99354b62bfa2a58f6b29511ad506e98c3c18ea964303c.png)
+
+#### Stage 에 "Create IMS Service Starter Task" 추가
+
+도커 컨테이너 방식으로 IMS Service를 운용할 경우 실제 온프레미스 환경처럼 system daemon을 사용할 수 없습니다. **(억지로 사용할 수 있지만 이럴 경우 Docker 컨테이너를 통해 호스트 OS에 접근할 수 있는 취약점이 발생하므로 권장하지 않습니다)**
+
+그렇기 때문에 Service를 수동으로 실행시켜야하는데, 이를 사용자가 직접 하나씩 키기에는 번거롭기 때문에 **서비스를 한번에 실행해 줄 Script**가 필요합니다. **Create IMS Service Starter Task**는 이러한 Script를 생성해주는 Task입니다.
+
+![picture 13](../../images/40d99977350f725ea2a98156d3d2d3f029b4122fd60b95aec47356622c079d81.png)  
+![picture 12](../../images/e49778d9f797551a0cffeb38fc9bb3a91ab64ae875e9bb5e59213b5dc2de396b.png)
+![picture 14](../../images/c5b7e01d8ec165957b1ba113485a6130f6f8c8520787149a1b0a67b86fd133a6.png)  
+
+##### 매개 변수 설명
+
+- **`Display name`** : Task의 이름을 이름을 지정할 수 있습니다.
+- **`CMD_ES_INDEX_STATUS`** : 엘라스틱 서치의 INDEX 상태를 확인하기 위한 명령어 입니다. 되도록이면 수정을 금지합니다.
+- **`CMD_ES_START_TIME`** : 엘라스틱 서치의 상태값 확인을 주기적으로 하기 위해서 시스템 현재 시간을 얻는 명령어 입니다. 되도록 수정을 금지합니다.
+- **`ES_HOST`** : 엘라스틱 서치가 서비스 될 때 사용할 주소입니다 (IP 또는 도메인)
+- **`ES_JAVA_HOME`** : 엘라스틱 서치를 서비스할 때 사용될 JDK 경로입니다.
+- **`ES_PATH`** : 엘라스틱 서치 설치 경로입니다.
+- **`ES_PORT`** : 엘라스틱 서치가 서비스 될 때 사용할 포트 번호입니다.
+
+#### Stage 에 "Create IMS Service Starter" Task 추가
+
+![picture 15](../../images/bbae99096502b3c23ebc365d60fe326d07cf111085c6a3ab5defc415d5e4f1e3.png)  
