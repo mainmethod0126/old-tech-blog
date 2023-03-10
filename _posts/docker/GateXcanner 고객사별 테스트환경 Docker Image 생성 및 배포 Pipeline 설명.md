@@ -115,7 +115,7 @@ VM 생성은 OS를 직접 설치하게됩니다. 컴퓨터 OS를 직접 설치�
 
 Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추가입니다.
 
-먼저 고객사가 추가될 경우 **"Release pipeline"** 을 수정해야합니다.
+"sample" 이라는 고객사가 추가된다고 가정하에 예시를 들어보겠습니다.
 
 #### ims-docker-image-release 수정
 
@@ -128,6 +128,8 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 
 고객사의 추가는 **"Release pipeline"** 의 **Stage**추가로 이어집니다.
 **고객사와 Stage는 1:1 맵핑**입니다 이 점을 주의해주세요
+
+저희가 등록하려는 고객사의 명이 "sample" 이기 때문에 stage의 이름은 "sample" 로 맞춰줍니다.
 
 > **잠깐! Stages 란?**
 > pipeline에서 **stages**는 파이프라인을 여러 단계로 구성하는 경우에 사용됩니다. 논리적인 단계로 일련의 관련된 작업 집합을 의미합니다. 이 말이 좀 어려울 수 있는데 예를 들어 **Build, Test, Deploy** 들이 각각 관련된 하나의 작업 집합으로 표현될 수 있습니다.
@@ -145,7 +147,7 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 
 ![picture 13](../../images/40d99977350f725ea2a98156d3d2d3f029b4122fd60b95aec47356622c079d81.png)  
 ![picture 12](../../images/e49778d9f797551a0cffeb38fc9bb3a91ab64ae875e9bb5e59213b5dc2de396b.png)
-![picture 14](../../images/c5b7e01d8ec165957b1ba113485a6130f6f8c8520787149a1b0a67b86fd133a6.png)  
+![picture 16](../../images/d8f86d20e2de25f12d189ddbe0954d032a8fa35933a74c1e1d2f35f83e7c2f3e.png)  
 
 ##### 매개 변수 설명
 
@@ -153,10 +155,49 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 - **`CMD_ES_INDEX_STATUS`** : 엘라스틱 서치의 INDEX 상태를 확인하기 위한 명령어 입니다. 되도록이면 수정을 금지합니다.
 - **`CMD_ES_START_TIME`** : 엘라스틱 서치의 상태값 확인을 주기적으로 하기 위해서 시스템 현재 시간을 얻는 명령어 입니다. 되도록 수정을 금지합니다.
 - **`ES_HOST`** : 엘라스틱 서치가 서비스 될 때 사용할 주소입니다 (IP 또는 도메인)
-- **`ES_JAVA_HOME`** : 엘라스틱 서치를 서비스할 때 사용될 JDK 경로입니다.
-- **`ES_PATH`** : 엘라스틱 서치 설치 경로입니다.
 - **`ES_PORT`** : 엘라스틱 서치가 서비스 될 때 사용할 포트 번호입니다.
 
-#### Stage 에 "Create IMS Service Starter" Task 추가
+#### Stage 에 "Build and push ims docker image Task" 추가
 
-![picture 15](../../images/bbae99096502b3c23ebc365d60fe326d07cf111085c6a3ab5defc415d5e4f1e3.png)  
+ims 개발 테스트용 도커 이미지를 생성 및 배포하는 Task입니다.
+
+내부적으로는 **다수의 Task를 하나의 Task로 묶은 Task group** 이며,
+아래와 같은 Task들이 존재합니다.
+
+- **`Create IMS Dockerfile`** : ims docker file을 생성합니다.
+- **`build`** : 생성된 dockerfile을 빌드합니다.
+- **`push`** : 생성된 docker image를 ACR에 push 합니다.
+- **`Delete image after push`** : agent의 용량을 확보하기 위하여 push 완료된 image를 삭제합니다.
+
+실제로 Task group는 **pipelines -> task groups > build and push ims docker image** 에서 확인하실 수 있습니다.
+
+![picture 15](../../images/bbae99096502b3c23ebc365d60fe326d07cf111085c6a3ab5defc415d5e4f1e3.png)
+![picture 18](../../images/17badbbe5ba45ec6276195ffea29ddd7e9aabdf176b2efe8f8d56d9c32427dc9.png)  
+![picture 19](../../images/5955cfc2140ad78d636b516e75a86a611fa8333424682b57a4124ba0da092803.png)  
+
+해당 Task의 매개변수는 상당히 많은 편입니다.
+
+대부분 Task group 안에 포함된 **Create IMS Dockerfile** 이라는 Task가 사용하는 변수들이며,
+
+아래는 각 매개 변수의 설명입니다.
+
+##### 매개 변수 설명
+
+- **`Display name`** : Task의 이름을 이름을 지정할 수 있습니다.
+- **`API_ARTIFACT_DST_PATH`** : API 서비스 아티팩트가 컨테이너 상에 위치할 경로입니다.
+- **`API_ARTIFACT_SRC_PATH`** : 호스트 OS 상에 위치하는 API 서비스 아티팩트의 경로입니다. default 값으로 들어간 명령어는 gx api artifacts는 기본적으로 .jar형식으로 생성되나 경로 중간에 빌드 날짜 및 jdk 버전 등 옵셔널한 값이 들어가게되어 아티팩트의 경로가 항상 일정하지 않습니다. 그렇기 때문에 명령어를통하여 .jar 파일이 존재하는 디렉토리 경로를 찾도록 하였습니다.
+- **`ARTIFACT_PATH`** : 릴리즈 파이프라인 실행시 다운로드되는 아티팩트들이 위치하는 경로입니다.
+- **`CONTAINER_REPOSITORY`** : 도커 파일 빌드 시 생성될 이미지의 레포지토리 명입니다.
+- **`CONTAINER_TAG`** : 도커 파일 빌드 시 생성될 이미지의 태그 명입니다.
+- **`ELASTIC_SEARCH_DESIGN_DST_PATH`** : 엘라스틱 서치 설정을 위한 파일들이 모여있는 디렉토리가 컨테이너 상에서 위치할 경로입니다.
+- **`ELASTIC_SEARCH_DESIGN_SRC_PATH`** : 엘라스틱 서치 설정을 위한 파일들이 모여있는 디렉토리가 호스트 OS사에 위치한 경로입니다.
+- **`ELASTIC_SEARCH_INITIALIZER_DST_PATH`** : 엘라스틱 서치 초기화를 진행할 파일이 컨테이너 상에서 위치할 경로입니다.
+- **`ELASTIC_SEARCH_INITIALIZER_SRC_PATH`** : 엘라스틱 서치 초기화를 진행할 파일이 호스트 OS상에 위차하고있는 경로입니다.
+- **`HR_MIGRATION_ARTIFACT_DST_PATH`** : RDB와 GateXcannerApiSvr 과의 인사정보 연동을 위한 서비스가 도커 이미지상에서 위치할 경로입니다.
+- **`HR_MIGRATION_ARTIFACT_SRC_PATH`** : RDB와 GateXcannerApiSvr 과의 인사정보 연동을 위한 서비스가 호스트OS에서 위치하고있는 경로입니다.
+- **`ORGANIZATION_CODE`** : 조직 코드입니다. 이 값을 기준으로 front-end 의 VUE_APP_COMPANY 프로퍼티의 값이 지정됩니다.
+- **`PULL_REPOSITORY`** : 생성될 도커 파일의 베이스 이미지 레포지토리 명입니다.
+- **`PULL_TAG`** : 생성될 도커 파일의 베이스 이미지 태그 명입니다.
+- **`REGISTRY`** : 도커 이미지를 다운로드, 업로드할 레지스트리 주소입니다.
+- **`SERVICE_STARTER_DST_PATH`** : 컨테이너에서 IMS 서비스가 동작하도록 하기 위한 단일 서비스들을 실행시키는 스크립트의 컨테이너상의 경로입니다.
+
