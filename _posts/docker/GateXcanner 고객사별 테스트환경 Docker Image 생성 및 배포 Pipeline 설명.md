@@ -157,6 +157,9 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 - **`ES_HOST`** : 엘라스틱 서치가 서비스 될 때 사용할 주소입니다 (IP 또는 도메인)
 - **`ES_PORT`** : 엘라스틱 서치가 서비스 될 때 사용할 포트 번호입니다.
 
+만약 elasticsearch가 다른 PC에 존재할 경우 ES_HOST 및 ES_PORT 를 수정해야합니다.
+"sample" 고객사의 경우 **localhost**에 elasticsearch가 설치되어있다고 가정하겠습니다.
+
 #### Stage 에 "Build and push ims docker image Task" 추가
 
 ims 개발 테스트용 도커 이미지를 생성 및 배포하는 Task입니다.
@@ -195,9 +198,32 @@ ims 개발 테스트용 도커 이미지를 생성 및 배포하는 Task입니�
 - **`ELASTIC_SEARCH_INITIALIZER_SRC_PATH`** : 엘라스틱 서치 초기화를 진행할 파일이 호스트 OS상에 위차하고있는 경로입니다.
 - **`HR_MIGRATION_ARTIFACT_DST_PATH`** : RDB와 GateXcannerApiSvr 과의 인사정보 연동을 위한 서비스가 도커 이미지상에서 위치할 경로입니다.
 - **`HR_MIGRATION_ARTIFACT_SRC_PATH`** : RDB와 GateXcannerApiSvr 과의 인사정보 연동을 위한 서비스가 호스트OS에서 위치하고있는 경로입니다.
-- **`ORGANIZATION_CODE`** : 조직 코드입니다. 이 값을 기준으로 front-end 의 VUE_APP_COMPANY 프로퍼티의 값이 지정됩니다.
+- **`ORGANIZATION_CODE`** : 조직 코드입니다. 이 값을 기준으로 front-end 의 **VUE_APP_COMPANY** 프로퍼티의 값이 지정됩니다.
 - **`PULL_REPOSITORY`** : 생성될 도커 파일의 베이스 이미지 레포지토리 명입니다.
 - **`PULL_TAG`** : 생성될 도커 파일의 베이스 이미지 태그 명입니다.
 - **`REGISTRY`** : 도커 이미지를 다운로드, 업로드할 레지스트리 주소입니다.
 - **`SERVICE_STARTER_DST_PATH`** : 컨테이너에서 IMS 서비스가 동작하도록 하기 위한 단일 서비스들을 실행시키는 스크립트의 컨테이너상의 경로입니다.
 
+**CONTAINER_REPOSITORY** 는 기본적으로 빈값입니다.
+생성될 Docker Image의 경우 분리를 쉽게 하기 위하여 고객사 명을 **REPOSITORY** 로 사용합니다.
+
+저희가 생성할 고객사는 **"sample"** 이기 때문에 **CONTAINER_REPOSITORY** 의 값을 **"sample"** 로 지정해줍니다.
+
+##### Docker Base Image의 선택
+
+**Docker Base Image** 는 **REGISTRY, PULL_REPOSITORY, PULL_TAG** 세개의 매개변수 값으로 정해집니다.
+
+예들어 각 변수의 값이 아래와 같을 때
+
+- **REGISTRY** = gatexcanner.azurecr.io
+- **PULL_REPOSITORY** = ims-centos7-mariadb-nginx-1.18.0
+- **PULL_TAG** = latest
+
+생성되는 도커 Base Image 는
+
+```dockerfile
+// <REGISTRY>/<PULL_REPOSITORY>:<PULL_TAG>
+gatexcanner.azurecr.io/ims-centos7-mariadb-nginx-1.18.0:latest
+```
+
+과 같이 선택됩니다.
