@@ -1,8 +1,47 @@
+- [GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 설명](#gatexcanner-ims-고객사별-테스트환경-docker-image-생성-및-배포-pipeline-설명)
+  - [개요 : 도커 이미지로 배포하는게 아닌 서비스에 갑자기 웬 도커??](#개요--도커-이미지로-배포하는게-아닌-서비스에-갑자기-웬-도커)
+    - [고객사마다 다른 환경](#고객사마다-다른-환경)
+    - [고객사별 개발 환경을 VM으로 관리하면 발생하는 문제점](#고객사별-개발-환경을-vm으로-관리하면-발생하는-문제점)
+      - [많은 용량 차지](#많은-용량-차지)
+      - [생성하는데 많은 시간 소모](#생성하는데-많은-시간-소모)
+      - [변경된 형상에 대한 히스토리 관리의 어려움](#변경된-형상에-대한-히스토리-관리의-어려움)
+      - [내,외부로 형상 공유의 어려움](#내외부로-형상-공유의-어려움)
+      - [자동화의 어려움](#자동화의-어려움)
+      - [무수히 많이 추가되는 고객사](#무수히-많이-추가되는-고객사)
+    - [도커를 채택하면서 해결되는 문제점](#도커를-채택하면서-해결되는-문제점)
+  - [GateXcanner 고객사별 테스트 환경 자동화 아키텍처](#gatexcanner-고객사별-테스트-환경-자동화-아키텍처)
+    - [용어 설명](#용어-설명)
+    - [일반 사용자별 역할](#일반-사용자별-역할)
+  - [Pipeline 관리](#pipeline-관리)
+    - [신규 고객사 추가](#신규-고객사-추가)
+      - [ims-docker-image-release 수정](#ims-docker-image-release-수정)
+      - [신규 고객사의 "Stage" 추가](#신규-고객사의-stage-추가)
+      - [Agent 선택](#agent-선택)
+        - [Agent pool](#agent-pool)
+        - [Demands](#demands)
+      - [Stage 에 "Create IMS Service Starter Task" 추가](#stage-에-create-ims-service-starter-task-추가)
+        - [매개 변수 설명](#매개-변수-설명)
+      - [Stage 에 "Build and push ims docker image Task" 추가](#stage-에-build-and-push-ims-docker-image-task-추가)
+        - [매개 변수 설명](#매개-변수-설명-1)
+        - [Docker Base Image의 선택](#docker-base-image의-선택)
+  - [만들어진 Pipeline 동작시키기](#만들어진-pipeline-동작시키기)
+    - [수동으로 Pipeline 실행](#수동으로-pipeline-실행)
+    - [동작 상황 모니터링](#동작-상황-모니터링)
+    - [ACR에 업로드된 Docker Image 확인](#acr에-업로드된-docker-image-확인)
+  - [Tester 입장에서 Docker Image 가져다 사용하기](#tester-입장에서-docker-image-가져다-사용하기)
+    - [테스트할 Docker Image PULL](#테스트할-docker-image-pull)
+    - [컨테이너 실행](#컨테이너-실행)
+    - [Service Starter 실행](#service-starter-실행)
+    - [실제 Service 동작 여부 확인](#실제-service-동작-여부-확인)
+  - [마무리](#마무리)
+
 # GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 설명
 
 안녕하세요? 제품개발 1팀에서 주로 웹 백엔드 개발 업무를 하고있는 신우섭입니다.
 
 온프레미스 제품에 대하여 고객사별 테스트 환경을 구축해본 경험과 GateXcanner 제품 관련 업무를 맡는 분들에게 가이드를 드리고자 글을 작성하였습니다.
+
+---
 
 ## 개요 : 도커 이미지로 배포하는게 아닌 서비스에 갑자기 웬 도커??
 
