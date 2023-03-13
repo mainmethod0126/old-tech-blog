@@ -1,6 +1,6 @@
 # GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 설명
 
-안녕하세요? 제품개발 1팀에서 웹 백엔드 포지션으로 근무중인 신우섭입니다.
+안녕하세요? 제품개발 1팀에서 주로 웹 백엔드 개발 업무를 하고있는 신우섭입니다.
 
 온프레미스 제품에 대하여 고객사별 테스트 환경을 구축해본 경험과 GateXcanner 제품 관련 업무를 맡는 분들에게 가이드를 드리고자 글을 작성하였습니다.
 
@@ -289,3 +289,142 @@ gatexcanner.azurecr.io/ims-centos7-mariadb-nginx-1.18.0:latest
 저희가 테스트한 Pipeline이 정상적으로 완료되면서 **"sample"** 이라는 docker repository 가 업로드된 걸 확인할 수 있습니다.
 
 ![picture 32](../../images/0e2fcbe4155f8146e2fa7791526f80b0eef57c012d58aaf81a9e3ba981724cd5.png)
+
+---
+
+## Tester 입장에서 Docker Image 가져다 사용하기
+
+자 지금까지는 pipeline 관리자 입장에서 설명했다면 이제 만들어진 Docker Image가져다 테스트하는 방법을 다뤄보겠습니다.
+
+주의해야할 점은 **컨테이너 실행 시 꼭 필수 옵션들을 입력해야 한다는 점** 입니다.
+
+사전에 준비할 사항은  **호스트 OS로 사용될 Docker 가 설치되어있는 리눅스** 환경입니다.
+
+### 테스트할 Docker Image PULL
+
+먼저 호스트 OS에서 명령어를 이용하여 테스트할 Docker Image를 PULL합니다.
+
+```bash
+sudo docker pull gatexcanner.azurecr.io/sample:latest
+```
+
+```bash
+# 최초 다운로드시 아래와 같이 동작
+latest: Pulling from sample
+f34b00c7da20: Already exists
+b1878569ed46: Already exists
+a6b5e9714f28: Already exists
+a8c48ecabdee: Already exists
+32717d094fb4: Already exists
+9139d8fa880a: Already exists
+c2c83b3a59df: Already exists
+baa008ff85e6: Already exists
+98476978e429: Already exists
+e254983efed8: Already exists
+66f12df588e7: Already exists
+c92eaf1242ff: Already exists
+74abb8b9c57e: Pull complete
+fc0cce5c4017: Pull complete
+c2bf4d7bd6ee: Pull complete
+1d1259ec7d52: Downloading [===============>                                   ]  23.23MB/74.21MB
+201c23db1e4d: Download complete
+1ba332db62a3: Downloading [=========================================>         ]  37.16MB/45.23MB
+1f8f8dfac4db: Download complete
+4bae21a53085: Download complete
+458a4b604579: Download complete
+32565140c54b: Downloading [==>                                                ]  14.58MB/352.1MB
+72b8863bf0bd: Waiting
+0e6dd61403ba: Waiting
+c92e0d690303: Waiting
+97134c794d05: Waiting
+ab971958d767: Waiting
+7958b47b988e: Waiting
+97113d7e9a24: Waiting
+053aaa2fee99: Waiting
+829bfe6301a8: Waiting
+91a7ad4a0c0a: Pulling fs layer
+```
+
+환경에 따라 다운받는데 시간이 좀 걸릴 수 있으니 차분하게 기다려 봅니다.
+
+정상적으로 다운이 완료되면 아래와 같이 표시됩니다.
+
+```bash
+Digest: sha256:9596b32b94320ba42d4c6bdbbb10785c799b9cbe71109cbbe6b438a759f73922
+Status: Downloaded newer image for gatexcanner.azurecr.io/sample:latest
+gatexcanner.azurecr.io/sample:latest
+```
+
+### 컨테이너 실행
+
+자 이제 다운로드된 컨테이너를 실행시켜보겠습니다.
+이때 **환경변수와 포트바인딩이 필수**이니 꼭 주의해주세요!
+
+```bash
+# sudo docker run -e HOST_IP=<호스트 OS IP> -e SERVICER_PORT=<Nginx가 listening중인 PORT> -it -p <호스트쪽 Mapping될 PORT>:<Nginx가 listening중인 PORT> --name <컨테이너 이름> <Docker Image 이름>
+
+sudo docker run -e HOST_IP=10.81.10.175 -e SERVICE_PORT=9000 -it -p 9000:9000 --name sample-ims-test gatexcanner.azurecr.io/sample:latest
+```
+
+정상적으로 컨테이너가 실행되면 아래와 같이 터미널이 변경됩니다.
+
+```bash
+[root@<컨테이너 ID> /]#
+```
+
+### Service Starter 실행
+
+자 이제 컨테이너에 필요한 서비스들을 실행시켜보겠습니다. 앞서 말씀드린 것 과 같이 도커 컨테이너는 **System daemon 을 사용할 수 없습니다(사용시 보안 위험 존재)** 그렇기 때문에 Pipeline에서 생성한 **Service starter shell** 을 이용하겠습니다.
+
+```bash
+cd /home/softcamp
+```
+
+```bash
+ls
+```
+
+```bash
+GateXcanner        elastic_design.tar                        elasticsearch_init.sh   mariadb
+GateXcannerApiSvr  elasticsearch-7.17.6                      gx-hr-migration         nginx-1.18.0-2.el7.ngx.x86_64.rpm
+elastic_design     elasticsearch-7.17.6-linux-x86_64.tar.gz  ims-service-starter.sh
+```
+
+위와 같이 /home/softcamp 경로에 가보면 여러 파일들이 존재하는데 이중 **"ims-service-stareter.sh"** 을 실행시키면 됩니다.
+
+```bash
+./ims-service-starter.sh
+```
+
+실행시키면 많은 텍스트들이 표준출력으로 주르륵 찍힐텐대 **GateXcanner 제품에 대하여 잘 모르시는 분은** 최종적으로 **`"INFO  2023-03-13 02:51:23[main] [SystemController:151] - 서비스 실행 완료"`** 라는 텍스트가 찍혔는지 확인하시면 됩니다.
+
+ **GateXcannerApiSvr가 초기화(기본 역할 생성, 기본 아이디 생성 등) 작업으로 인하여 실행되는데 시간이 좀 걸립니다. 스크립트 실행 후 차 한잔 하셔도 됩니다. (모든 작업이 완료되는대 대략 3~5분 소요)**
+
+자 실행이 완료되었으면 실제로 외부에서 서비스가 동작하는지 확인해봅니다.
+
+### 실제 Service 동작 여부 확인
+
+컨테이너를 실행할때 사용한 호스트 OS와 바인딩 된 포트번호로 외부에서 웹 서비스를 요청해보겠습니다.
+
+![picture 33](../../images/b1ebd7f4bf95ebe2c4cd8941edb3fffe878dab23f4356ae38fa858e06d0d2de3.png)  
+
+자 페이지는 정상적으로 얻어집니다.
+
+그럼 **API 서비스와, Elasticsearch** 의 정상 동작 여부를 확인하기 위하여 로그인을 해볼까요?
+
+![picture 34](../../images/fc105455ad5d6063a80930851d358b17cec7ccb2849d969320d6d3ed1849ed69.png)  
+
+로그인도 정상적으로 이뤄지는것을 확인했습니다.
+
+이렇게 로그인까지 완료되면 서비스들은 정상적으로 실행된 것이고, 이제 테스트를 진행하며 서비스 기능 자체의 비정상 동작 들을 확인할 수 있습니다.
+
+---
+
+## 마무리
+
+지금까지 온프레미스 제품인 GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 알아보았습니다.
+
+관련하여 문의 사항 또는 문서의 미흡한 점을 알려주시면 적극적으로 회신 및 수정하도록 하겠습니다.
+
+감사합니다.
+
