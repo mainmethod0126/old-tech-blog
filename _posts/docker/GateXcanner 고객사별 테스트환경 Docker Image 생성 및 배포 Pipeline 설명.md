@@ -14,15 +14,15 @@ GateXcanner 제품은 온프레미스 제품으로, 실제 고객사에 배포�
 
 예를들어 아래와 같이 3개의 고객사가 존재한다 할 때 각 고객사 환경을 예로 들어보겠습니다.
 
-|환경|A 고객사|B 고객사|C 고객사|
-|---|---|---|---|---|
-|OS|Centos 7|RedHat 8|Centos 7|
-|JDK|11|14|17|
-|DB|MS-SQL|MariaDB|Postgresql|
-|Elasticsearch Version|7.8.1|7.17.6|8.0.1|
-|Nginx Version|1.18.0|1.20.0|1.20.2|
-|API Version|1.0.0|1.0.4|1.3.3|
-|CLIENT Version|2.0.1|2.0.0|2.1.5|
+| 환경                  | A 고객사 | B 고객사 | C 고객사   |
+| --------------------- | -------- | -------- | ---------- |  |
+| OS                    | Centos 7 | RedHat 8 | Centos 7   |
+| JDK                   | 11       | 14       | 17         |
+| DB                    | MS-SQL   | MariaDB  | Postgresql |
+| Elasticsearch Version | 7.8.1    | 7.17.6   | 8.0.1      |
+| Nginx Version         | 1.18.0   | 1.20.0   | 1.20.2     |
+| API Version           | 1.0.0    | 1.0.4    | 1.3.3      |
+| CLIENT Version        | 2.0.1    | 2.0.0    | 2.1.5      |
 
 위와 같이 각각의 고객사가 서로 다른 환경을 지니게될 경우가 존재합니다.
 물론 최대한 동일한 형상을 유지해야겠지만 고객사의 요구로 인하여 어쩔 수 없이 하나, 두개 변경하다보면 기준 환경에서 많이 달라지게 됩니다.
@@ -139,13 +139,41 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 ![picture 10](../../images/3550dbdfc138f206debaf64c91436faf97566126e76a19aeef1049d7a4e9cd71.png)  
 ![picture 11](../../images/bc7bda96d15a2cb4abd99354b62bfa2a58f6b29511ad506e98c3c18ea964303c.png)
 
+#### Agent 선택
+
+자 저희가 추가한 Stage가 동작할 환경을 선택해야합니다.
+
+결국 빌드 및 배포를 위해서는 어딘가의 PC에서 이 작업이 이뤄져야하는데, 이를 위한 PC를 선택하는 것이 Agent 선택이라고 생각하시면 됩니다.
+
+이 선택된 Agent에서 저희가 추가한 Task 작업들이 이뤄집니다.
+
+![picture 13](../../images/40d99977350f725ea2a98156d3d2d3f029b4122fd60b95aec47356622c079d81.png)  
+![picture 22](../../images/a6df862da30b4f24f86cc600c62a0dd1d488a7f11c48da6eb66a8f0ebc6c1881.png)  
+
+##### Agent pool
+
+- **VM** : 제품개발 1팀에서 구축해놓은 Self hosted Agent Pool 입니다. MS에서 재공하는 Agent들이 아니기에 Task에 필요한 기타 환경들을 다운해야하는 단점이 있지만, Private하고 사내 시스템과 연결하기 쉽다는 장점이 있습니다. 다수의 Self hosted Agent 가 존재할 수 있으며 **Demands 를 통해 사용할 Agent를 선택해야합니다.**
+
+Agent pool 에 어떠한 agent들이 존재하는지 확인하기 위해서는 관리자 권한이 필요하며, 아래와 같은 페이지에서 확인할 수 있습니다.
+
+![picture 23](../../images/fa9c2ed9f8a157926b5313aa173556a491297e06137b75920ee5b69c0243a44f.png)  
+
+##### Demands
+
+Agent Pool에 등록된 여러 Agent중 실제로 사용될 Agent를 선택하기 위한 Filter 라고 보시면 됩니다.
+
+위 조건을 통해 Agent가 선택됩니다.
+
+GateXcanner 자동화를 위한 **Agent는 Ubuntu 20.04 Agent**가 있습니다.
+
+위 이미지와 같이 Demands 를 지정해주면 **Ubuntu 20.04 Agent** 에서 Task가 동작하게 됩니다.
+
 #### Stage 에 "Create IMS Service Starter Task" 추가
 
 도커 컨테이너 방식으로 IMS Service를 운용할 경우 실제 온프레미스 환경처럼 system daemon을 사용할 수 없습니다. **(억지로 사용할 수 있지만 이럴 경우 Docker 컨테이너를 통해 호스트 OS에 접근할 수 있는 취약점이 발생하므로 권장하지 않습니다)**
 
 그렇기 때문에 Service를 수동으로 실행시켜야하는데, 이를 사용자가 직접 하나씩 키기에는 번거롭기 때문에 **서비스를 한번에 실행해 줄 Script**가 필요합니다. **Create IMS Service Starter Task**는 이러한 Script를 생성해주는 Task입니다.
 
-![picture 13](../../images/40d99977350f725ea2a98156d3d2d3f029b4122fd60b95aec47356622c079d81.png)  
 ![picture 12](../../images/e49778d9f797551a0cffeb38fc9bb3a91ab64ae875e9bb5e59213b5dc2de396b.png)
 ![picture 16](../../images/d8f86d20e2de25f12d189ddbe0954d032a8fa35933a74c1e1d2f35f83e7c2f3e.png)  
 
@@ -197,7 +225,8 @@ ims 개발 테스트용 도커 이미지를 생성 및 배포하는 Task입니�
 - **`ELASTIC_SEARCH_INITIALIZER_DST_PATH`** : 엘라스틱 서치 초기화를 진행할 파일이 컨테이너 상에서 위치할 경로입니다.
 - **`ELASTIC_SEARCH_INITIALIZER_SRC_PATH`** : 엘라스틱 서치 초기화를 진행할 파일이 호스트 OS상에 위차하고있는 경로입니다.
 - **`HR_MIGRATION_ARTIFACT_DST_PATH`** : RDB와 GateXcannerApiSvr 과의 인사정보 연동을 위한 서비스가 도커 이미지상에서 위치할 경로입니다.
-- **`HR_MIGRATION_ARTIFACT_SRC_PATH`** : RDB와 GateXcannerApiSvr 과의 인사정보 연동을 위한 서비스가 호스트OS에서 위치하고있는 경로입니다.
+- **`HR_MIGRATION_ARTIFACT_SRC_PATH`** : RDB와 GateXcannerApiSvr 과의 인사정보 연동을 위한 서비스가 호스트OS에서 위치하고있는 경로입니다. 여기서 주의해야하는 점이 하나 있습니다. 기본값을 보면 아래와 같을 텐대 중간에 **SK-hynix** 과 같이 특정 조직의 이름이 들어가있습니다. 이 정보는 잘못된 정보기 보다는 **HR_MIGRATION** 서비스의 종류가 크게 **SK-hynix, kpx** 두 조직의 방식을 기준으로 나눠져 있어서 그렇습니다. 나중에는 고객사 이름이 빠지고 **방식의 이름**으로 변경될 가능성이 높습니다.
+`$(dirname "$(find ./ -type f -path "./_gx-hr-migration-release/**/SK-hynix/**/15/*" -name "*.jar")")`
 - **`ORGANIZATION_CODE`** : 조직 코드입니다. 이 값을 기준으로 front-end 의 **VUE_APP_COMPANY** 프로퍼티의 값이 지정됩니다.
 - **`PULL_REPOSITORY`** : 생성될 도커 파일의 베이스 이미지 레포지토리 명입니다.
 - **`PULL_TAG`** : 생성될 도커 파일의 베이스 이미지 태그 명입니다.
@@ -219,11 +248,44 @@ ims 개발 테스트용 도커 이미지를 생성 및 배포하는 Task입니�
 - **PULL_REPOSITORY** = ims-centos7-mariadb-nginx-1.18.0
 - **PULL_TAG** = latest
 
-생성되는 도커 Base Image 는
+결과적으로 사용되게 되는 도커 Base Image 는 아래와 같습니다.
+
+
 
 ```dockerfile
 // <REGISTRY>/<PULL_REPOSITORY>:<PULL_TAG>
 gatexcanner.azurecr.io/ims-centos7-mariadb-nginx-1.18.0:latest
 ```
 
-과 같이 선택됩니다.
+> **잠깐! 원하는 Base Image가 없다면?**
+> 만약 고객사의 환경과 맞는(os, db 기타 등등) Base Image가 ACR에 없을 수 있습니다.
+> 이럴 경우는 아예 새로운 Base Image를 직접 만들어서 ACR에 업로드 하거나 기존 Base Image를 토대로 수정된 Base Image를 직접 추가하고나서, 해당 Base Image를 활용해야합니다.
+
+---
+
+## 만들어진 Pipeline 동작시키기
+
+자 "sample" 이라는 stage가 추가된 pipeline을 동작시켜보겠습니다.
+
+### 수동으로 Pipeline 실행
+
+![picture 20](../../images/b913438b507ac2da9652c0a7bf63878e1c522b3da0878f0eb7fb9c4abf027594.png)  
+![picture 21](../../images/f030e54700ac648bdda93c64acdea2dfd156221ae1a3b009017ab775f61f4132.png)  
+
+### 동작 상황 모니터링
+
+현재 동작중인 또는 동작이 완료된 Pipeline의 **성공, 경고, 에러** 발생 여부와, 발생 원인들을 로그 형식으로 확인할 수 있습니다.
+
+![picture 29](../../images/0d22dc78d8b3ae93b56394e598df359d3abe4b2a250bfcc38eb2bbc276cde4e2.png)  
+![picture 28](../../images/4d7e79da548080d9493ea62afa07dba34669e8da5f1c30c59f5c5b5a8787ded4.png)  
+![picture 30](../../images/1aa73b76e45798d14898525fd3c307f869a89e5b7cac2e404e1a1e0745f48a21.png)  
+
+정상적으로 Pipeline이 완료되면 최종적으로 모든 **Stages** 들이 **Succeeded** 로 변하게 됩니다.
+
+### ACR에 업로드된 Docker Image 확인
+
+**https://portal.azure.com/** 경로를 들어가서 권한이 있는 계정으로 로그인하면 아래와 같이 ACR에 업로드된 Docker Image 리스트를 확인할 수 있습니다.
+
+저희가 테스트한 Pipeline이 정상적으로 완료되면서 **"sample"** 이라는 docker repository 가 업로드된 걸 확인할 수 있습니다.
+
+![picture 32](../../images/0e2fcbe4155f8146e2fa7791526f80b0eef57c012d58aaf81a9e3ba981724cd5.png)
