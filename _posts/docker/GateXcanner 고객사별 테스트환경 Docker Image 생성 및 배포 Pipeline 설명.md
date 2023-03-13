@@ -422,9 +422,9 @@ elastic_design     elasticsearch-7.17.6-linux-x86_64.tar.gz  ims-service-starter
 
 ## 마무리
 
-지금까지 온프레미스 제품인 GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 알아보았습니다.
+지금까지 온프레미스 제품인 "GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline" 알아보았습니다.
 
-관련하여 문의 사항 또는 문서의 미흡한 점을 알려주시면 적극적으로 회신 및 수정하도록 하겠습니다.
+관련하여 문의 사항 또는 문서의 미흡한 점(오탈자, 실제와 다름 등)을 알려주시면 적극적으로 회신 및 수정하도록 하겠습니다.
 
 감사합니다.
 
