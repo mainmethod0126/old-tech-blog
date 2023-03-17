@@ -214,7 +214,7 @@ GateXcanner 자동화를 위한 **Agent는 Ubuntu 20.04 Agent**가 있습니다.
 그렇기 때문에 Service를 수동으로 실행시켜야하는데, 이를 사용자가 직접 하나씩 키기에는 번거롭기 때문에 **서비스를 한번에 실행해 줄 Script**가 필요합니다. **Create IMS Service Starter Task**는 이러한 Script를 생성해주는 Task입니다.
 
 ![picture 12](../../images/e49778d9f797551a0cffeb38fc9bb3a91ab64ae875e9bb5e59213b5dc2de396b.png)
-![picture 16](../../images/d8f86d20e2de25f12d189ddbe0954d032a8fa35933a74c1e1d2f35f83e7c2f3e.png)  
+![picture 1](../../images/fe783fb6745ae31aeab4a1853eeb1a4e6934add3db45cb4550711dca3774fcfe.png)  
 
 ##### 매개 변수 설명
 
@@ -223,6 +223,9 @@ GateXcanner 자동화를 위한 **Agent는 Ubuntu 20.04 Agent**가 있습니다.
 - **`CMD_ES_START_TIME`** : 엘라스틱 서치의 상태값 확인을 주기적으로 하기 위해서 시스템 현재 시간을 얻는 명령어 입니다. 되도록 수정을 금지합니다.
 - **`ES_HOST`** : 엘라스틱 서치가 서비스 될 때 사용할 주소입니다 (IP 또는 도메인)
 - **`ES_PORT`** : 엘라스틱 서치가 서비스 될 때 사용할 포트 번호입니다.
+- **`ES_JVM_XMS`** : 엘라스틱 서치 실행 시 jvm '-XmsNg' 옵션의 N값을 지정합니다.
+- **`ES_JVM_XMX`** : 엘라스틱 서치 실행 시 jvm '-XmxNg' 옵션의 N값을 지정합니다.
+- **`ES_CONFIG_PATH`** : 엘라스틱 서치의 Config 파일 경로를 명시합니다. (이 위치에 config를 옮긴다던가 하는건 아닙니다.)
 
 만약 elasticsearch가 다른 PC에 존재할 경우 ES_HOST 및 ES_PORT 를 수정해야합니다.
 "sample" 고객사의 경우 **localhost**에 elasticsearch가 설치되어있다고 가정하겠습니다.
@@ -408,7 +411,7 @@ sudo docker run -e HOST_IP=10.81.10.175 -e SERVICE_PORT=9000 -it -p 9000:9000 --
 정상적으로 컨테이너가 실행되면 아래와 같이 터미널이 변경됩니다.
 
 ```bash
-[root@<컨테이너 ID> /]#
+[root@<컨테이너 ID> /]
 ```
 
 ### Service Starter 실행
