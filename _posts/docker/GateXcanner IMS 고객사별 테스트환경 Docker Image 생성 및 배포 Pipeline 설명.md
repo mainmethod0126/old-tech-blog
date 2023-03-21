@@ -1,4 +1,5 @@
 - [GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 설명](#gatexcanner-ims-고객사별-테스트환경-docker-image-생성-및-배포-pipeline-설명)
+  - [문서 수정 히스토리](#문서-수정-히스토리)
   - [개요 : 도커 이미지로 배포하는게 아닌 서비스에 갑자기 웬 도커??](#개요--도커-이미지로-배포하는게-아닌-서비스에-갑자기-웬-도커)
     - [고객사마다 다른 환경](#고객사마다-다른-환경)
     - [고객사별 개발 환경을 VM으로 관리하면 발생하는 문제점](#고객사별-개발-환경을-vm으로-관리하면-발생하는-문제점)
@@ -36,6 +37,11 @@
   - [마무리](#마무리)
 
 # GateXcanner IMS 고객사별 테스트환경 Docker Image 생성 및 배포 Pipeline 설명
+
+## 문서 수정 히스토리
+
+- **2023-03-20 :** 조직별 config repository 로 부터 데이터를 참조하는 내용 추가
+
 
 안녕하세요? 제품개발 1팀에서 주로 웹 백엔드 개발 업무를 하고있는 신우섭입니다.
 
@@ -122,7 +128,7 @@ VM 생성은 OS를 직접 설치하게됩니다. 컴퓨터 OS를 직접 설치�
 
 ## GateXcanner 고객사별 테스트 환경 자동화 아키텍처
 
-![picture 3](../../images/4584fbdc83730070ce6323abdbf2ddb29700f69e8cf0bd58a691a3b9a21a3285.png)  
+![picture 3](../../images/a0e1bbffba2a5df0ea670aec6b0fe8c52314a84a869a82e2fb507ecc013c1638.png)  
 
 ### 용어 설명
 
@@ -135,6 +141,7 @@ VM 생성은 OS를 직접 설치하게됩니다. 컴퓨터 OS를 직접 설치�
 - **`Self hosted Agent`** : Self-hosted agent는 조직의 **서버, 가상 머신 또는 컨테이너**에서 실행되는 Azure Pipelines agent입니다. Self-hosted agent는 조직의 네트워크에서 빌드 및 배포 작업을 수행하므로 클라우드 기반 빌드 및 배포 서비스를 사용할 수 없는 경우에도 사용할 수 있습니다.
 - **`Tester`** : ACR에 존재하는 고객사별 이미지를 이용하여 테스트 작업을 진행하는 인원입니다.
 - **`Dev test server`** : 개발 단계에서 테스트를 진행하기 위한 테스트 서버입니다. 고객사별 도커 컨테이너를 항상 실행상태로 유지하여 언제든 테스트가 가능하도록 합니다.
+- **`Config injection`** : 조직(고객사)별 server의 config들이 각각 다를 수 있기 때문에 config를 별도로 관리하는 git repo로 부터 config를 얻어와 주입합니다.
 
 ### 일반 사용자별 역할
 
@@ -174,7 +181,7 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 > pipeline에서 **stages**는 파이프라인을 여러 단계로 구성하는 경우에 사용됩니다. 논리적인 단계로 일련의 관련된 작업 집합을 의미합니다. 이 말이 좀 어려울 수 있는데 예를 들어 **Build, Test, Deploy** 들이 각각 관련된 하나의 작업 집합으로 표현될 수 있습니다.
 > 저는 이 stage를 "조직(고객사)"라는 좀 큰 범위로 묶었습니다.
 
-![picture 8](../../images/4842a1c876592b47c867a63c9fee9ac5d95802551b331bef25fe5160a8417830.png)
+![picture 7](../../images/09a8540dd79487a8dba42c12809af0730f037e0d39f4fd455cce0172d8d45363.png)  
 ![picture 10](../../images/3550dbdfc138f206debaf64c91436faf97566126e76a19aeef1049d7a4e9cd71.png)  
 ![picture 11](../../images/bc7bda96d15a2cb4abd99354b62bfa2a58f6b29511ad506e98c3c18ea964303c.png)
 
@@ -245,8 +252,8 @@ ims 개발 테스트용 도커 이미지를 생성 및 배포하는 Task입니�
 실제로 Task group는 **pipelines -> task groups > build and push ims docker image** 에서 확인하실 수 있습니다.
 
 ![picture 15](../../images/bbae99096502b3c23ebc365d60fe326d07cf111085c6a3ab5defc415d5e4f1e3.png)
-![picture 18](../../images/17badbbe5ba45ec6276195ffea29ddd7e9aabdf176b2efe8f8d56d9c32427dc9.png)  
-![picture 19](../../images/5955cfc2140ad78d636b516e75a86a611fa8333424682b57a4124ba0da092803.png)  
+![picture 8](../../images/016d47b7cee3091010c5edf381a635a27c697a008130fe68edbacd08ba3e15f4.png)  
+![picture 9](../../images/b3b3d9b90921dde440c9e2629be0e15876291b7c0e959491fb8fb5b3997401e2.png)  
 
 해당 Task의 매개변수는 상당히 많은 편입니다.
 
@@ -270,10 +277,13 @@ ims 개발 테스트용 도커 이미지를 생성 및 배포하는 Task입니�
 - **`HR_MIGRATION_ARTIFACT_SRC_PATH`** : RDB와 GateXcannerApiSvr 과의 인사정보 연동을 위한 서비스가 호스트OS에서 위치하고있는 경로입니다. 여기서 주의해야하는 점이 하나 있습니다. 기본값을 보면 아래와 같을 텐대 중간에 **SK-hynix** 과 같이 특정 조직의 이름이 들어가있습니다. 이 정보는 잘못된 정보기 보다는 **HR_MIGRATION** 서비스의 종류가 크게 **SK-hynix, kpx** 두 조직의 방식을 기준으로 나눠져 있어서 그렇습니다. 나중에는 고객사 이름이 빠지고 **방식의 이름**으로 변경될 가능성이 높습니다.
 `$(dirname "$(find ./ -type f -path "./_gx-hr-migration-release/**/SK-hynix/**/15/*" -name "*.jar")")`
 - **`ORGANIZATION_CODE`** : 조직 코드입니다. 이 값을 기준으로 front-end 의 **VUE_APP_COMPANY** 프로퍼티의 값이 지정됩니다.
+- **`ORGANIZATION_NAME`** : 조직 이름입니다. 이 값을 기준으로 config repo에서 얻어온 조직별 디렉토리 명을 구분합니다.
 - **`PULL_REPOSITORY`** : 생성될 도커 파일의 베이스 이미지 레포지토리 명입니다.
 - **`PULL_TAG`** : 생성될 도커 파일의 베이스 이미지 태그 명입니다.
 - **`REGISTRY`** : 도커 이미지를 다운로드, 업로드할 레지스트리 주소입니다.
 - **`SERVICE_STARTER_DST_PATH`** : 컨테이너에서 IMS 서비스가 동작하도록 하기 위한 단일 서비스들을 실행시키는 스크립트의 컨테이너상의 경로입니다.
+- **`CONFIG_ROOT_DIR_NAME`** : 서버 셋팅에 필요한 config 파일들이 위치한 최상위 폴더 이름 입니다.
+- 
 
 **CONTAINER_REPOSITORY** 는 기본적으로 빈값입니다.
 생성될 Docker Image의 경우 분리를 쉽게 하기 위하여 고객사 명을 **REPOSITORY** 로 사용합니다.
