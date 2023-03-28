@@ -58,7 +58,7 @@ FROM centos:7.1908
 ### 도커파일
 
 ```dockerfile
-FROM centos:7.7.1908
+FROM 10.81.10.175:5000/ims-nginx:1.18.0-centos7
 
 # Install MariaDB
 RUN yum -y install mariadb-server mariadb
@@ -66,10 +66,14 @@ RUN yum -y install mariadb-server mariadb
 # Start MariaDB and set it to start on boot
 RUN systemctl start mariadb && systemctl enable mariadb
 
-# Add user with sudo privileges
-RUN adduser --uid 1000 softcamp
-RUN echo "softcamp:softcamp123!@#" | chpasswd
-RUN echo "softcamp ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# Create gx_client and kiosk MariaDB accounts
+RUN mysql -u root <<-EOF
+CREATE USER 'gx_client'@'%' IDENTIFIED BY 'softcamp123!@#';
+CREATE USER 'kiosk'@'%' IDENTIFIED BY 'kiosk123!@#';
+GRANT ALL PRIVILEGES ON *.* TO 'gx_client'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'kiosk'@'%';
+FLUSH PRIVILEGES;
+EOF
 ```
 
 ### dockerfiles 저장 경로
@@ -169,9 +173,6 @@ sudo docker run -it --log-driver=json-file \
 이를 해결하는 방법들을 찾아보면 **--privileged** 같은 방법을 알려주는 곳이 종종 있는데 이 옵션을 쓸 경우 컨테이너를 통하여 호스트 os에 침범할 수 있는 보안취약점이 생길 수 있어 사용하면 안됩니다.
 
 #### 도커 컨테이너에서 nginx 백그라운드로 실행시키기
-
-
-
 
 ```bash
 nginx start

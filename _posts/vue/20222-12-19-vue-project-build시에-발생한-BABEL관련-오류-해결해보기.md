@@ -1,6 +1,6 @@
 ---
 layout: post
-title: vue project build시에 발생한 BABEL관련 오류 해결해보기.md
+title: vue project build시에 발생한 BABEL관련 오류 해결해보기
 tags: [vue, temp, debug]
 skills: [vue]
 author: mainmethod0126
@@ -10,6 +10,8 @@ excerpt_separator: <!--more-->
 # 서론
 
 회사에서 포지션은 백엔드 개발자지만, 급하게 vue2로 만들어진 프론트 엔드 프로젝트를 빌드할 상황이 있어서 빌드를 하였는데, 여러개의 WARING이 발견되어 해당 경고가 왜 발생했는지와 해결방법을 알아보았습니다.
+
+<!--more-->
 
 ## 발생한 경고
 
