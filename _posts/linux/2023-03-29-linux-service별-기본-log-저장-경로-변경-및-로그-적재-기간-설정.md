@@ -7,6 +7,7 @@ author: mainmethod0126
 excerpt_separator: <!--more-->
 ---
 ## /var/log/message가 너무 혼잡하다 로그를 분리하자!
+<!--more-->
 
 리눅스에 직접 만들 서비스들을 등록할 경우 별도로 log 경로를 지정하지 않으면 기본적으로 **`/var/log/message`** 경로에 쌓이게 됩니다.
 
