@@ -7,6 +7,7 @@ author: mainmethod0126
 excerpt_separator: <!--more-->
 ---
 ## /var/log/message가 너무 혼잡하다 로그를 분리하자!
+
 <!--more-->
 
 리눅스에 직접 만들 서비스들을 등록할 경우 별도로 log 경로를 지정하지 않으면 기본적으로 **`/var/log/message`** 경로에 쌓이게 됩니다.
@@ -19,20 +20,32 @@ excerpt_separator: <!--more-->
 
 ## 분리할 서비스의 .service 파일 수정
 
-### StandardOutput 과 StandardError
+방법이 **systemd 버전이 240 이상이냐 아니냐**에 따라서 분리됩니다.
 
-#### StandardOutput
+### systemd version 240 이상
+
+systemd version 240에 아래와 같은 기능이 추가되었습니다.
+
+```text
+// https://github.com/systemd/systemd/blob/main/NEWS
+CHANGES WITH 240:
+        * StandardOutput=/StandardError= in service files gained support for
+        new "append:…" parameters, for connecting STDOUT/STDERR of a service
+        to a file, and appending to it.
+```
+
+#### StandardOutput 과 StandardError
+
+##### StandardOutput
 
 서비스에서 **`표준출력`** 하는 메세지들을 어떤 파일로 내보낼지 지정할 수 있습니다.
-
-##### 예시
 
 ```bash
 [Service]
 StandardOutput=append:/var/log/myapp.log
 ```
 
-#### StandardError
+##### StandardError
 
 서비스에서 **`표준에러`** 로 출력되는 메세지들을 어떤 파일로 내보낼지 지정할 수 있습니다.
 
@@ -46,6 +59,33 @@ StandardError=append:/var/log/myapp.log
 ```bash
 sudo systemctl daemon-reload
 ```
+
+### systemd version 240 미만
+
+#### rsyslog expression-based filter
+
+systemd 가 못해주니 **`rsyslog`** 의 **`expression-based filter`** 를 이용하여 특정 서비스들에 대해 filter를 걸 수 있습니다.
+
+- /etc/systemd/system/<특정 서비스>.service 파일을 열람합니다.
+   아래 내용을 반영합니다
+```text
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=<your program identifier>
+```
+- `sudo systemctl daemon-reload` 로 서비스 데몬을 리프레시 합니다. 
+- /etc/rsyslog.d/<new_file>.conf 와 같이 새로운 파일을 생성해 줍니다.
+- <new_file>.conf 열람하여 아래 내용을 추가합니다
+```text
+// programname 이 your program identifier 와 같다면 별도의 로그파일에 로그를 출력합니다.
+if $programname == '<your program identifier>' then /var/log/myapp.log & stop
+```
+- `sudo systemctl restart rsyslog` 로 rsyslog 서비스를 재실행합니다.
+
+더 자세한 정보는 아래를 참고해주시 바랍니다.
+
+[stackoverflow - systemd 서비스의 출력을 파일로 리디렉션하는 방법](https://stackoverflow.com/questions/37585758/how-to-redirect-output-of-systemd-service-to-a-file/48052152#48052152)
+[RSyslog Documentation](https://www.rsyslog.com/doc/v8-stable/configuration/filters.html)
 
 #### 로그를 그냥 안남기고 싶을 경우
 
@@ -216,3 +256,10 @@ service 파일을 수정해서 별도의 log파일을 만들었습니다.
 - **`size`** : 로그 파일의 크기가 지정한 크기를 넘으면 회전합니다.
 - **`start`** : 로그 파일 회전을 시작할 순서를 지정합니다.
 - **`weekly`** : 로그 파일을 주간으로 회전합니다.
+
+---
+
+## 참고 자료
+
+- [stackoverflow - systemd 서비스의 출력을 파일로 리디렉션하는 방법](https://stackoverflow.com/questions/37585758/how-to-redirect-output-of-systemd-service-to-a-file/48052152#48052152)
+- [RSyslog Documentation](https://www.rsyslog.com/doc/v8-stable/configuration/filters.html)
