@@ -1,6 +1,6 @@
 ---
 layout: post
-title: RDB-Sequence와Auto-Increment
+title: RDB Sequence와AutoIncrement
 tags: [common]
 skills: [db]
 author: mainmethod0126
