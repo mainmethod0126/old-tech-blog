@@ -1,18 +1,4 @@
-{% assign exclude_tags = "note,temp,incomplete" | split:"," %}
-
-
-{% assign filtered_posts = "" | split: "" %}
-{% for post in paginator.posts %}
-  {% unless exclude_tags contains post.tags %}
-    {% assign filtered_posts = filtered_posts | push: post %}
-  {% endunless %}
-{% endfor %}
-
-
-{% assign custom_total_pages = filtered_posts.size | divided_by: paginator.per_page | ceil %}
-
-
-{% if custom_total_pages > 1 %}
+{% if paginator.total_pages > 1 %}
 <div class="pagination">
     <div class="previous">
         
@@ -32,7 +18,7 @@
     </div>
 
     <div class="page_number">
-        {{ paginator.page }} / {{ custom_total_pages }}
+        {{ paginator.page }} / {{ paginator.total_pages }}
     </div>
 
     <div class="next">
@@ -44,10 +30,10 @@
             <span><i class="fas fa-chevron-right"></i></span>
         </a>
 
-        {% if paginator.next_page and paginator.next_page != custom_total_pages %}
+        {% if paginator.next_page and paginator.next_page != paginator.total_pages %}
         <!-- >> -->
         <a aria-label="{{ site.data.language.str_next_page | default: 'Next' }}"
-        href="{{ site.paginate_path | relative_url | replace: ':num', custom_total_pages }}" class="button">
+        href="{{ site.paginate_path | relative_url | replace: ':num', paginator.total_pages }}" class="button">
             <span><i class="fas fa-angle-double-right"></i></span>
         </a>
         {% endif %}
