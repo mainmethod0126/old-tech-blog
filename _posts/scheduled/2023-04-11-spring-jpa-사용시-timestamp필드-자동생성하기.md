@@ -47,17 +47,19 @@ public class Item extends BaseEntity {
 
 자 위 예시처럼 user와 item 클래스가 공통적으로 baseEntity 를 상속받습니다.
 
-이 baseEntity에는 `createdAt` 는 생성 시간을, `updatedAt` 변경 시간을 나타내는 필드들이 존재합니다.
+이 baseEntity에는 `createdAt` 는 **생성 시간**을, `updatedAt` **변경 시간**을 나타내는 필드들이 존재합니다.
 
 그럼 이제 user와 item 객체는 영속화 될 때 createdAt과 updatedAt을 포함하여 영속화 되겠죠?
 
-하지만 매번 사용자가 `setCreatedAt(), setUpdatedAt()` 을 명시하기 보다는 자동으로 값이 들어가면 좋을 것 같습니다.
+그치만 저희는 수동으로 값을 넣어주는게 아니라 **자동** 으로 createdAt와 updatedAt을 값이 들어가기를 원합니다.
 
-이때 `@CreatedDate, @LastModifiedDate` 를 사용할 수 있습니다.
+또한 @Entity 클래스의 상속에서도 문제가 있습니다.
+
+이를 위해서는 추가적인 작업이 더 필요합니다.
 
 ---
 
-### @CreatedDate, @LastModifiedDate 과 @EnableJpaAuditing
+### @CreatedDate, @LastModifiedDate
 
 `@CreatedDate`, `@LastModifiedDate` 두 어노테이션은 변수에 직접 시간을 할당해주지 않아도 자동으로 시간이 할당되도록 해주는 어노테이션입니다.
 
@@ -97,7 +99,7 @@ JPA에서 @Entity 가 붙은 클래스가 부모 클래스를 상속 받기 위�
 
 둘 조건간에는 명확한 차이가 존재합니다.
 
-@Entity 클래스의 경우 실제 DB 테이블과 무조건 매핑되어야합니다.
+**@Entity 클래스의 경우 실제 DB 테이블과 무조건 매핑**되어야합니다.
 그런데 저희가 만든 BaseEntity는 공통 매핑정보만을 제공할 뿐 DB에 **BaseEntity** 라는 테이블이 존재해서는 안됩니다.
 
 그럼 **DB에 테이블은 만들지 않고, @Entity 클래스의 부모 클래스로 사용하기 위해서는 어떤 방법이 있을까요?**
@@ -147,7 +149,8 @@ public abstract class BaseEntity { // abstract 를 추가하여 추상 클래스
 그럼 결론적으로 저희가 사용할 `@CreatedDate` 과 `@LastModifiedDate` 는 Entity가 DB에 **영속화되기 직전의 시간정보**를 얻어야하니까
 **@PrePersist 가 붙은 메소드를 구현하는 클래스를 하나 만들면 되겠습니다**
 
-하지만, 전세계에는 많은 개발자가 있고 이미 누군가 만들어 놓은 클래스가 있습니다.
+하지만! 이미 누군가 만들어 놓은 클래스가 있습니다.
+
 **AuditingEntityListener** 라는 클래스인데.
 
 요놈의 구현부를 보면
@@ -172,7 +175,7 @@ public void touchForUpdate(Object target) {
 
 ```java
 @EntityListeners(AuditingEntityListener.class)
-@MappedSuperclass // @Entity 를 삭제하고 @MappedSuperclass 를 추가~!
+@MappedSuperclass //@MappedSuperclass 를 추가~!
 public abstract class BaseEntity { // abstract 를 추가하여 추상 클래스임을 명시합니다! 
     // 생성 시간
     @CreatedDate
