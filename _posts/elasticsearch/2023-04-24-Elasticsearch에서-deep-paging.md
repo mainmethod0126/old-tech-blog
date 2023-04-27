@@ -7,7 +7,13 @@ author: mainmethod0126
 excerpt_separator: <!--more-->
 ---
 
-## Deep Paging Search 란
+
+우선 결론을 먼저 말씀드리면, Elasticsearch에서의 deep paging은 안하는게 맞습니다.
+지금부터 그 이유를 알아보겠습니다.
+
+<!--more-->
+
+## Deep Paging 란
 
 인터넷을 하다보면 이런 화면을 여럿 보셨을 겁니다.
 ![picture 1](../../images/7d267196895c1945f7f821d2b448533a9893b28fde960760fd51d10effa64e9b.png)  
@@ -49,7 +55,7 @@ excerpt_separator: <!--more-->
 
 그래야 사용자가 페이지를 이동하는 순간에도 실시간으로 페이지 데이터가 변경되지 않고, 지나쳐온 이전 페이지를 다시 보고싶을 때 언제든지 이동할 수 있기 때문입니다.
 
-이때 Elasticsearch에서는 양면의 칼날이 발동하는데 자칫하면 큰 문제를 일으킬 수 있습니다, RDBMS와 비교를 통해 알아보겠습니다.
+이때 Elasticsearch에서는 양날의 검이 발동하는데 자칫하면 큰 문제를 일으킬 수 있습니다, RDBMS와 비교를 통해 알아보겠습니다.
 
 ---
 
@@ -254,9 +260,9 @@ B라는 유저 데이터가 노드1, 노드2, 노드3 각각 존재할 수도 �
 
 좀 더 상세히 따지면 **샤드** 단위로 병렬 진행인데, 분산 아키텍처의 조회 속도가 빠른 이유가 병렬로 작업이 진행되 빠르다는 것을 설명하기 위한 자리이니 상세한 내용은 생략하겠습니다.
 
-### 역색인, 분산 아키텍처 이게 Deep Paging Search와 무슨 상관인가?
+### 역색인, 분산 아키텍처 이게 Deep Paging 과 무슨 상관인가?
 
-다시 Deep Paging Search 로 돌아가 봅시다.
+다시 Deep Paging 로 돌아가 봅시다.
 
 Elasticsearch의 경우 페이징을 할 수 있는 방법이 크게 3가지 존재합니다.
 
@@ -270,6 +276,8 @@ Elasticsearch의 경우 페이징을 할 수 있는 방법이 크게 3가지 존
 - **요구사항 2 : 얕은 페이지(최신 데이터) 와 깊은 페이지 (오래된 데이터)를 자유롭게 오갈 수 있어야한다.**
 
 보통의 페이징 처리의 경우 위 요구사항이 기본적으로 들어갑니다.
+
+#### Elasticsearch 페이징 방식
 
 |방식|요구사항 1|요구사항 2 |특징|단점|RDBMS에서 비슷한 방식|
 |---|---|---|---|---|---|
@@ -286,26 +294,56 @@ Elasticsearch의 경우 페이징을 할 수 있는 방법이 크게 3가지 존
 
 > 그럼 deep paging 을 하지 말란 소린가요?
 
-네.. 저의 경험으로는 안하는게 맞습니다.
+**"네..!! 저의 경험으로는 확실하게 말씀드릴 수 있습니다 안하는게 맞습니다."**
 
 정 페이징을 사용해야할 경우 **from, size** 를 사용하면서 **인덱스의 max_result_window** 를 넘는 경우 검색을 하지 못하도록 막는 방법으로 가야합니다.
 
+### max_result_window 제한을 늘려서 사용하는 방법은?
 
+이때를 위해 **분산 아키텍처** 를 설명했습니다.
 
+**분산 아키텍처** 특징으로 클러스터에 포함된 노드(좀더 명확히는 샤드)들에 쿼리가 똑같이 전달되며 병렬로 작업이 이뤄진다고 했습니다.
 
+엘라스틱서치 공식 페이지의 글을 인용하겠습니다
 
+> **Deep Paging in Distributed Systems**
+>
+>To understand why deep paging is problematic, let’s imagine that we are searching within a single index with five primary shards. When we request the first page of results (results 1 to 10), each shard produces its own top 10 results and returns them to the coordinating node, which then sorts all 50 results in order to select the overall top 10.
+>
+>Now imagine that we ask for page 1,000—​results 10,001 to 10,010. Everything works in the same way except that each shard has to produce its top 10,010 results. The coordinating node then sorts through all 50,050 results and discards 50,040 of them!
+>
+>You can see that, in a distributed system, the cost of sorting results grows exponentially the deeper we page. There is a good reason that web search engines don’t return more than 1,000 results for any query.
+> https://www.elastic.co/guide/en/elasticsearch/guide/current/pagination.html
 
+쉽게 요약하자면 이런 내용입니다.
 
+**"깊은 페이지를 검색할 수록 리소스 사용량은 급격하게 늘어난다"**
 
+쿼리를 받은 샤드들은 자신이 가진 데이터에서 쿼리에 명시된 데이터 수량만큼 (페이지당 데이터 수) 일단 조회합니다. 이런 샤드들이 여러개있으면 그 모든 샤드들의 조회 결과를 합산한 다음 **실제로 검색자가 요구한 데이터와 가장 부합하는 10개의 데이터만을 반환하고 나머지는 버립니다.**
 
+만약 max_result_window 를 100만개로 늘려서 마지막 100만 번째 데이터를 from, size로 조회하면..?
 
+각 샤드가 100만개씩, 총 500만개의 데이터가 **정렬 작업**을 위해 순간적으로 메모리에 올라갈 겁니다. 서비스가 꿱 하고 죽어도 이상이 없게되겠죠
 
+> "어? 그러면 다른 방식도 결과적으로 깊은 페이징을 하면 위험한거 아닌가요?"
+
+물론 다른 방식들도 위험하긴 마찬가집니다. 하지만 상대적으로 **from, size**에 비하여 안전하죠
+
+from, size의 경우 99999 페이지를 조회할때도 전체 데이터에 대한 정렬이 이뤄지고 99998페이지를 조회할 때도 정렬이, 99997페이지를 조회할 때도 정렬이, 페이지를 바꿀때마다 정렬이 이뤄집니다.
+
+보통 정렬 알고리즘은 메모리상에서 동작하는데 그만큼 대용량 메모리 공간이 자주 할당된다는 얘기죠,
+
+반면에 **scroll 또는 search after**의 경우 최초 한번만 검색 데이터에 대하여 정렬한 후 메모리에서는 내리고 **파일로 관리하면 됩니다** 페이지를 이동한다고 해서 전체 데이터를 다시 정렬하기 위하여 대량의 메모리공간을 할당하는 증상이 발생하지 않죠
+
+서비스 입장에서는 딱 한번만 버티면 이후에 페이지를 여러번 변경하여도 문제가 없습니다
+하지만 이 딱 한번의 타이밍에 여러 동작이 동시에 이뤄지면 서비스가 다운될 수 있게됩니다
 
 ---
 
-## Elasticsearch Deep Paging Search 해도 되는건가?
+## 결론 : Elasticsearch에서 Deep Paging은 포기하세요
 
-Elasticsearch에서 깊은 검색을 해보신분이라면 저와 같은 의문을 느껴보신 분이 계실겁니다.
+- **분산 아키텍처를 채택한 Elasticsearch에는 Deep Paging 이 어울리지 않음**
+- **구글 처럼 최대 페이지 크기를 제한 시키고 검색 키워드를 바꿔서 검색을 하도록 유도해야함**
 
 
 
