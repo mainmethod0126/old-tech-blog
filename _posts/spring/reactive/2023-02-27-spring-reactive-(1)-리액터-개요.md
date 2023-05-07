@@ -46,4 +46,4 @@ excerpt_separator: <!--more-->
 - **Processor(프로세서)**
 
 **Publisher**는 하나의 Subscription당 하나의 Subscriber에 전송할 데이터를 생성한다. P
-![picture 1](../../../images/aca3b33bf802388f6a1dda08dc008af8bcc875ebd6b67c5513dfaeaa1d8d881b.png)  
+![picture 1](..//images/aca3b33bf802388f6a1dda08dc008af8bcc875ebd6b67c5513dfaeaa1d8d881b.png)  

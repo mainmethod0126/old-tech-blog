@@ -128,7 +128,7 @@ VM 생성은 OS를 직접 설치하게됩니다. 컴퓨터 OS를 직접 설치�
 
 ## GateXcanner 고객사별 테스트 환경 자동화 아키텍처
 
-![picture 3](../../images/a0e1bbffba2a5df0ea670aec6b0fe8c52314a84a869a82e2fb507ecc013c1638.png)  
+![picture 3](/images/a0e1bbffba2a5df0ea670aec6b0fe8c52314a84a869a82e2fb507ecc013c1638.png)  
 
 ### 용어 설명
 
@@ -168,7 +168,7 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 도커 이미지를 만들어내는 **"Release pipeline"** 의 이름은 **ims-docker-image-release** 입니다.
 이 **ims-docker-image-release** 를 수정해야합니다.
 
-![picture 6](../../images/8441e45a6a3ceafc4b713c58e11cb7cd67a721942237c10ca69007c9328aa1ad.png)  
+![picture 6](/images/8441e45a6a3ceafc4b713c58e11cb7cd67a721942237c10ca69007c9328aa1ad.png)  
 
 #### 신규 고객사의 "Stage" 추가
 
@@ -181,9 +181,9 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 > pipeline에서 **stages**는 파이프라인을 여러 단계로 구성하는 경우에 사용됩니다. 논리적인 단계로 일련의 관련된 작업 집합을 의미합니다. 이 말이 좀 어려울 수 있는데 예를 들어 **Build, Test, Deploy** 들이 각각 관련된 하나의 작업 집합으로 표현될 수 있습니다.
 > 저는 이 stage를 "조직(고객사)"라는 좀 큰 범위로 묶었습니다.
 
-![picture 7](../../images/09a8540dd79487a8dba42c12809af0730f037e0d39f4fd455cce0172d8d45363.png)  
-![picture 10](../../images/3550dbdfc138f206debaf64c91436faf97566126e76a19aeef1049d7a4e9cd71.png)  
-![picture 11](../../images/bc7bda96d15a2cb4abd99354b62bfa2a58f6b29511ad506e98c3c18ea964303c.png)
+![picture 7](/images/09a8540dd79487a8dba42c12809af0730f037e0d39f4fd455cce0172d8d45363.png)  
+![picture 10](/images/3550dbdfc138f206debaf64c91436faf97566126e76a19aeef1049d7a4e9cd71.png)  
+![picture 11](/images/bc7bda96d15a2cb4abd99354b62bfa2a58f6b29511ad506e98c3c18ea964303c.png)
 
 #### Agent 선택
 
@@ -193,8 +193,8 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 
 이 선택된 Agent에서 저희가 추가한 Task 작업들이 이뤄집니다.
 
-![picture 13](../../images/40d99977350f725ea2a98156d3d2d3f029b4122fd60b95aec47356622c079d81.png)  
-![picture 22](../../images/a6df862da30b4f24f86cc600c62a0dd1d488a7f11c48da6eb66a8f0ebc6c1881.png)  
+![picture 13](/images/40d99977350f725ea2a98156d3d2d3f029b4122fd60b95aec47356622c079d81.png)  
+![picture 22](/images/a6df862da30b4f24f86cc600c62a0dd1d488a7f11c48da6eb66a8f0ebc6c1881.png)  
 
 ##### Agent pool
 
@@ -202,7 +202,7 @@ Pipeline의 수정이 빈번하게 이뤄질 경우가 신규 고객사의 추�
 
 Agent pool 에 어떠한 agent들이 존재하는지 확인하기 위해서는 관리자 권한이 필요하며, 아래와 같은 페이지에서 확인할 수 있습니다.
 
-![picture 23](../../images/fa9c2ed9f8a157926b5313aa173556a491297e06137b75920ee5b69c0243a44f.png)  
+![picture 23](/images/fa9c2ed9f8a157926b5313aa173556a491297e06137b75920ee5b69c0243a44f.png)  
 
 ##### Demands
 
@@ -220,8 +220,8 @@ GateXcanner 자동화를 위한 **Agent는 Ubuntu 20.04 Agent**가 있습니다.
 
 그렇기 때문에 Service를 수동으로 실행시켜야하는데, 이를 사용자가 직접 하나씩 키기에는 번거롭기 때문에 **서비스를 한번에 실행해 줄 Script**가 필요합니다. **Create IMS Service Starter Task**는 이러한 Script를 생성해주는 Task입니다.
 
-![picture 12](../../images/e49778d9f797551a0cffeb38fc9bb3a91ab64ae875e9bb5e59213b5dc2de396b.png)
-![picture 1](../../images/fe783fb6745ae31aeab4a1853eeb1a4e6934add3db45cb4550711dca3774fcfe.png)  
+![picture 12](/images/e49778d9f797551a0cffeb38fc9bb3a91ab64ae875e9bb5e59213b5dc2de396b.png)
+![picture 1](/images/fe783fb6745ae31aeab4a1853eeb1a4e6934add3db45cb4550711dca3774fcfe.png)  
 
 ##### 매개 변수 설명
 
@@ -251,9 +251,9 @@ ims 개발 테스트용 도커 이미지를 생성 및 배포하는 Task입니�
 
 실제로 Task group는 **pipelines -> task groups > build and push ims docker image** 에서 확인하실 수 있습니다.
 
-![picture 15](../../images/bbae99096502b3c23ebc365d60fe326d07cf111085c6a3ab5defc415d5e4f1e3.png)
-![picture 8](../../images/016d47b7cee3091010c5edf381a635a27c697a008130fe68edbacd08ba3e15f4.png)  
-![picture 9](../../images/b3b3d9b90921dde440c9e2629be0e15876291b7c0e959491fb8fb5b3997401e2.png)  
+![picture 15](/images/bbae99096502b3c23ebc365d60fe326d07cf111085c6a3ab5defc415d5e4f1e3.png)
+![picture 8](/images/016d47b7cee3091010c5edf381a635a27c697a008130fe68edbacd08ba3e15f4.png)  
+![picture 9](/images/b3b3d9b90921dde440c9e2629be0e15876291b7c0e959491fb8fb5b3997401e2.png)  
 
 해당 Task의 매개변수는 상당히 많은 편입니다.
 
@@ -321,16 +321,16 @@ gatexcanner.azurecr.io/ims-centos7-mariadb-nginx-1.18.0:latest
 
 ### 수동으로 Pipeline 실행
 
-![picture 20](../../images/b913438b507ac2da9652c0a7bf63878e1c522b3da0878f0eb7fb9c4abf027594.png)  
-![picture 21](../../images/f030e54700ac648bdda93c64acdea2dfd156221ae1a3b009017ab775f61f4132.png)  
+![picture 20](/images/b913438b507ac2da9652c0a7bf63878e1c522b3da0878f0eb7fb9c4abf027594.png)  
+![picture 21](/images/f030e54700ac648bdda93c64acdea2dfd156221ae1a3b009017ab775f61f4132.png)  
 
 ### 동작 상황 모니터링
 
 현재 동작중인 또는 동작이 완료된 Pipeline의 **성공, 경고, 에러** 발생 여부와, 발생 원인들을 로그 형식으로 확인할 수 있습니다.
 
-![picture 29](../../images/0d22dc78d8b3ae93b56394e598df359d3abe4b2a250bfcc38eb2bbc276cde4e2.png)  
-![picture 28](../../images/4d7e79da548080d9493ea62afa07dba34669e8da5f1c30c59f5c5b5a8787ded4.png)  
-![picture 30](../../images/1aa73b76e45798d14898525fd3c307f869a89e5b7cac2e404e1a1e0745f48a21.png)  
+![picture 29](/images/0d22dc78d8b3ae93b56394e598df359d3abe4b2a250bfcc38eb2bbc276cde4e2.png)  
+![picture 28](/images/4d7e79da548080d9493ea62afa07dba34669e8da5f1c30c59f5c5b5a8787ded4.png)  
+![picture 30](/images/1aa73b76e45798d14898525fd3c307f869a89e5b7cac2e404e1a1e0745f48a21.png)  
 
 정상적으로 Pipeline이 완료되면 최종적으로 모든 **Stages** 들이 **Succeeded** 로 변하게 됩니다.
 
@@ -340,7 +340,7 @@ gatexcanner.azurecr.io/ims-centos7-mariadb-nginx-1.18.0:latest
 
 저희가 테스트한 Pipeline이 정상적으로 완료되면서 **"sample"** 이라는 docker repository 가 업로드된 걸 확인할 수 있습니다.
 
-![picture 32](../../images/0e2fcbe4155f8146e2fa7791526f80b0eef57c012d58aaf81a9e3ba981724cd5.png)
+![picture 32](/images/0e2fcbe4155f8146e2fa7791526f80b0eef57c012d58aaf81a9e3ba981724cd5.png)
 
 ---
 
@@ -458,13 +458,13 @@ elastic_design     elasticsearch-7.17.6-linux-x86_64.tar.gz  ims-service-starter
 
 컨테이너를 실행할때 사용한 호스트 OS와 바인딩 된 포트번호로 외부에서 웹 서비스를 요청해보겠습니다.
 
-![picture 33](../../images/b1ebd7f4bf95ebe2c4cd8941edb3fffe878dab23f4356ae38fa858e06d0d2de3.png)  
+![picture 33](/images/b1ebd7f4bf95ebe2c4cd8941edb3fffe878dab23f4356ae38fa858e06d0d2de3.png)  
 
 자 페이지는 정상적으로 얻어집니다.
 
 그럼 **API 서비스와, Elasticsearch** 의 정상 동작 여부를 확인하기 위하여 로그인을 해볼까요?
 
-![picture 34](../../images/fc105455ad5d6063a80930851d358b17cec7ccb2849d969320d6d3ed1849ed69.png)  
+![picture 34](/images/fc105455ad5d6063a80930851d358b17cec7ccb2849d969320d6d3ed1849ed69.png)  
 
 로그인도 정상적으로 이뤄지는것을 확인했습니다.
 
