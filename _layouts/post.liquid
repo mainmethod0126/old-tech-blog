@@ -95,6 +95,7 @@ endif %}
 
   document.addEventListener('scroll', function (e) {
 
+
     if (window.scrollY >= postContentY - 60) {
       toc.style.cssText = "position: fixed; top: 60px;";
     }
@@ -135,7 +136,8 @@ endif %}
         before.classList.remove("toc-active");
     }
 
-    setTocVisibilty(postContent, toc);
+    {% comment %} setTocVisibilty(postContent, toc); {% endcomment %}
+
   }, false);
 
   window.addEventListener('resize', function (e) {
