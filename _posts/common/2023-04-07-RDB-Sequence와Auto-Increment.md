@@ -1,8 +1,8 @@
 ---
 layout: post
 title: RDB Sequence와AutoIncrement
-tags: [common]
-skills: [db, temp]
+tags: [common, temp]
+skills: [db]
 author: mainmethod0126
 excerpt_separator: <!--more-->
 ---
