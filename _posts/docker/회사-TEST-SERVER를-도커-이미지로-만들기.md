@@ -1,11 +1,4 @@
----
-layout: post
-title: 회사 TEST SERVER 도커 이미지로 만들기
-tags: [docker, temp, note]
-skills: [docker]
-author: mainmethod0126
-excerpt_separator: <!--more-->
----
+
 
 # 회사 TEST SERVER를 도커 이미지로 만들기
 

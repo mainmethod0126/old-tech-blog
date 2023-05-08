@@ -7,7 +7,9 @@ author: mainmethod0126
 excerpt_separator: <!--more-->
 ---
 
-작성 예정이며,
+작성 예정
+
+<!--more-->
 
 지금 알고 있는 내용으로는
 
