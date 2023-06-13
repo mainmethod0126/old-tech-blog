@@ -802,7 +802,8 @@ public WebMvcConfigurer webMvcConfigurer() {
       //...
     }
 
-    @Overridepublic void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
       //...
     }
   };
