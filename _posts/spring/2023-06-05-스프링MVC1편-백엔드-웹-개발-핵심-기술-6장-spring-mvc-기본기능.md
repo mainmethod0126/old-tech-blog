@@ -774,6 +774,7 @@ HTTP 메시지 컨버터를 사용하는 `@RequestBody` 도 컨트롤러가 필�
 
 스프링 MVC는 `@RequestBody` `@ResponseBody` 가 있으면
 `RequestResponseBodyMethodProcessor (ArgumentResolver)`
+
 `HttpEntity` 가 있으면 `HttpEntityMethodProcessor (ArgumentResolver)`를 사용한다.
 
 > 참고 : HttpMessageConverter 를 구현한 클래스를 한번 확인해보자
