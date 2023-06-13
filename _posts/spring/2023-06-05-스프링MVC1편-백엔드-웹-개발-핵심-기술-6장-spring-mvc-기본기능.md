@@ -625,7 +625,7 @@ JAVA 객체를 String으로, String을 JAVA 객체로 알아서 변환해주는 
 
 `org.springframework.http.converter.HttpMessageConverter`
 
-```JAVA
+```java
 package org.springframework.http.converter;
 
 public interface HttpMessageConverter<T> {
