@@ -751,6 +751,7 @@ Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContaine
 스프링은 10여개가 넘는 ReturnValueHandler 를 지원한다.
 예) `ModelAndView` , `@ResponseBody` , `HttpEntity` , `String`
 
+---
 
 ## HTTP 메시지 컨버터
 
@@ -775,6 +776,7 @@ HTTP 메시지 컨버터를 사용하는 `@RequestBody` 도 컨트롤러가 필�
 
 > 참고 : HttpMessageConverter 를 구현한 클래스를 한번 확인해보자
 
+---
 
 ## 확장
 
