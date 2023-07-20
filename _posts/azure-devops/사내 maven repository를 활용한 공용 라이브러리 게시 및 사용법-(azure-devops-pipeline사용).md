@@ -1,7 +1,30 @@
+<!-- TOC -->
+
+- [사내 maven repository를 활용한 공용 라이브러리 게시 및 사용법 (for gradle)](#사내-maven-repository를-활용한-공용-라이브러리-게시-및-사용법-for-gradle)
+  - [프로젝트의 build.gradle 수정](#프로젝트의-buildgradle-수정)
+    - [maven-publish 플러그인 추가](#maven-publish-플러그인-추가)
+    - [shadowJar 플러그인 추가 (optional)](#shadowjar-플러그인-추가-optional)
+    - [shadowJar Task 정의 (optional)](#shadowjar-task-정의-optional)
+    - [publishing Task 정의](#publishing-task-정의)
+      - [구역 1 : maven repo 인증을 위한 변수 값 셋팅](#구역-1--maven-repo-인증을-위한-변수-값-셋팅)
+      - [구역 2 : publishing 될 결과물에 대한 정보를 정의하는 task](#구역-2--publishing-될-결과물에-대한-정보를-정의하는-task)
+      - [구역 3 : maven repository 정보 및 인증을 위한 task](#구역-3--maven-repository-정보-및-인증을-위한-task)
+  - [azure release pipeline 을 통한 maven repository에 publish 하기](#azure-release-pipeline-을-통한-maven-repository에-publish-하기)
+    - [순서도](#순서도)
+    - [Azure Self Hosted Agent 에 gradle.properties 파일 생성](#azure-self-hosted-agent-에-gradleproperties-파일-생성)
+    - [Azure devops release pipeline 추가](#azure-devops-release-pipeline-추가)
+      - [Agent Job 선택](#agent-job-선택)
+      - [Task 추가](#task-추가)
+    - [트리깅 방식 선택 (Optional)](#트리깅-방식-선택-optional)
+    - [publish 테스트](#publish-테스트)
+  - [publish 결과 확인하기](#publish-결과-확인하기)
+  - [maven repository에 게시된 라이브러리 사용해보기](#maven-repository에-게시된-라이브러리-사용해보기)
+
+<!-- /TOC -->
+
 # 사내 maven repository를 활용한 공용 라이브러리 게시 및 사용법 (for gradle)
 
 **신성범 수석님** 이 만들어 놓으신 사내 **maven repository** 를 활용하여 공용 라이브러리를 게시 및 사용하는 방법을 **gradle** 프로젝트 기준으로 작성하였습니다.
-
 
 ---
 
@@ -315,4 +338,7 @@ dependencies {
 ```
 4. 복사했던 내용을 **dependencies task** 에 추가해줍니다.
 5. `./gradlew build --refresh-dependencies` 명령등으로 의존성들을 다시 다운 받습니다.
-6. 
+
+![picture 17](../../images/6820e27bd9044b14d2d0880a055851cb586fa134e1339d69e8d19a2b641472e4.png)  
+
+6. 라이브러리의 클래스를 사용할려고 할 때 정상적으로 패키지가 인식되면 라이브러리가 성공적으로 publish 된 것 입니다.
