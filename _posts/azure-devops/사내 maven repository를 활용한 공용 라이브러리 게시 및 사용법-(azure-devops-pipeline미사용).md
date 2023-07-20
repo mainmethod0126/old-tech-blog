@@ -4,7 +4,7 @@
 
 ---
 
-## 내 gradle 프로젝트 Publish 하는 방법 (Azure devops pipeline 미사용)
+## 내 gradle 프로젝트 Publish 하는 방법
 
 ### 프로젝트의 build.gradle 수정
 
