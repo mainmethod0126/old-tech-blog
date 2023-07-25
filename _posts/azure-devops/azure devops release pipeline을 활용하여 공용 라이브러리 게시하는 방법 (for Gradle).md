@@ -121,7 +121,6 @@ publishing {
     }
 
     // 구역 2 : publishing 될 결과물에 대한 정보를 정의하는 task
-    // 구역 2 : publishing 될 결과물에 대한 정보를 정의하는 task
     publications {
 
         // 구역 2-1 : shadowJar 를 사용할 경우
