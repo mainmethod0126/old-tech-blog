@@ -1,4 +1,3 @@
-
 <!-- TOC -->
 
 - [azure devops release pipeline을 활용하여 공용 라이브러리 게시하는 방법 (for Gradle)](#azure-devops-release-pipeline을-활용하여-공용-라이브러리-게시하는-방법-for-gradle)
@@ -21,6 +20,9 @@
     - [publish 결과 확인](#publish-결과-확인)
 
 <!-- /TOC -->
+
+
+
 # azure devops release pipeline을 활용하여 공용 라이브러리 게시하는 방법 (for Gradle)
 
 java gradle 프로젝트로 만들어진 라이브러리를 azure devops release pipeline 를 통하여 게시하는 방법을 안내드립니다.
@@ -119,7 +121,10 @@ publishing {
     }
 
     // 구역 2 : publishing 될 결과물에 대한 정보를 정의하는 task
+    // 구역 2 : publishing 될 결과물에 대한 정보를 정의하는 task
     publications {
+
+        // 구역 2-1 : shadowJar 를 사용할 경우
         shadow(MavenPublication) { publication -> 
             project.shadow.component(publication)
 
@@ -137,6 +142,23 @@ publishing {
                 description = 'A description of my library'
             }
         }
+
+        // 구역 2-2 : shadowJar 를 사용하지 않을 경우
+        // mavenJava(MavenPublication) {
+        //     groupId = 'com.softcamp'
+        //     artifactId = 'jsc'
+        //     version = "1.0.0"
+
+        //     println("publish infos")
+        //     println("groupId : " + groupId)
+        //     println("artifactId : " + artifactId)
+        //     println("version : " + version)
+
+        //     pom {
+        //         name = 'My Library'
+        //         description = 'A description of my library'
+        //     }
+        // }
     }
 
     // 구역 3 : maven repository 정보 및 인증을 위한 task
