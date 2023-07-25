@@ -1,3 +1,26 @@
+
+<!-- TOC -->
+
+- [azure devops release pipeline을 활용하여 공용 라이브러리 게시하는 방법 (for Gradle)](#azure-devops-release-pipeline을-활용하여-공용-라이브러리-게시하는-방법-for-gradle)
+  - [라이브러리 프로젝트의 build.gradle 수정](#라이브러리-프로젝트의-buildgradle-수정)
+    - [maven-publish 플러그인 추가](#maven-publish-플러그인-추가)
+    - [shadowJar 플러그인 추가 (optional)](#shadowjar-플러그인-추가-optional)
+    - [shadowJar Task 정의 (optional)](#shadowjar-task-정의-optional)
+    - [publishing Task 정의](#publishing-task-정의)
+      - [구역 1 : maven repo 인증을 위한 변수 값 셋팅](#구역-1--maven-repo-인증을-위한-변수-값-셋팅)
+      - [구역 2 : publishing 될 결과물에 대한 정보를 정의하는 task](#구역-2--publishing-될-결과물에-대한-정보를-정의하는-task)
+      - [구역 3 : maven repository 정보 및 인증을 위한 task](#구역-3--maven-repository-정보-및-인증을-위한-task)
+  - [azure release pipeline 을 통한 maven repository에 publish 하기](#azure-release-pipeline-을-통한-maven-repository에-publish-하기)
+    - [순서도](#순서도)
+    - [Azure devops release pipeline 추가](#azure-devops-release-pipeline-추가)
+      - [Agent Job 선택](#agent-job-선택)
+      - [Variables 추가 (Optional)](#variables-추가-optional)
+      - [Task 추가](#task-추가)
+    - [트리깅 방식 선택 (Optional)](#트리깅-방식-선택-optional)
+    - [publish 테스트](#publish-테스트)
+    - [publish 결과 확인](#publish-결과-확인)
+
+<!-- /TOC -->
 # azure devops release pipeline을 활용하여 공용 라이브러리 게시하는 방법 (for Gradle)
 
 java gradle 프로젝트로 만들어진 라이브러리를 azure devops release pipeline 를 통하여 게시하는 방법을 안내드립니다.
