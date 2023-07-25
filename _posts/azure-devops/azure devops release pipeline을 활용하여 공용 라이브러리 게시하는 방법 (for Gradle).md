@@ -160,14 +160,9 @@ maven repo 인증 정보를 셋팅하기 위한 부분이며,
 
 #### 구역 3 : maven repository 정보 및 인증을 위한 task
 
-기본적으로 softcamp maven repo에 게시하기 위해서는 인증 정보가 필요합니다.
-`사내 AD 계정` 과 연동되어 있기 때문에 바로 사용하실 수 있으십니다.
+로직상으로는 **구역 1** 에서 셋팅된 `inputUsername` 와 `inputPassword`, `inputMavenRepoUrl` 값을 사용합니다.
 
-로직상으로는 **구역 1** 에서 셋팅된 `inputUsername` 과 `inputPassword` 값을 사용합니다.
 
-더 자세한 내용은 신성범 수석님이 작성하신 [사내 Maven Repository 사용방법 정리](https://wiki.softcamp.co.kr/pages/viewpage.action?pageId=48217246) 에서 확인할 수 있습니다.
-
-</br>
 </br>
 
 ---
@@ -192,34 +187,37 @@ publish 방식이 이미 빌드된 결과물(.jar) 를 가지고 publish 하는 
 
 ![picture 4](../../images/63628f0eb8a5aeb8746e96645be41e2c4c53837fc8f7e91cd1080cdbf1b027cd.png)  
 
+</br>
 
 #### Agent Job 선택
 
-다시 한번 말씀 드리지만 **현재까지는 maven repository 의 url이 외부로 노출되어 있지 않기 때문에 (공인 도메인 아님) 필수로 사내에 구축되어진 Azure Self Hosted Agent 를 사용해야합니다**
-
 예시의 정보들은 제품개발 1팀에서 구축해놓은 Self Hosted Agent 를 사용하는 방법입니다.
-차후 공식적으로 사내에서 운영하는 Self Hosted Agent 를 구축하고 이를 이용해야할 필요가 있습니다. (또는 팀 별 Self Hosted Agent 별도 구축)
+
+**Azure에서 제공하는 Agent 를 사용하셔도 문제 없습니다.**
 
 Agent Pool : VM
 
 Demands
-|Name|Condition|Value|
-|---|---|---|
-|Agent.Name|equals|Ubuntu.20.04|
-|Agent.OS|equals|Linux|
-|Agent.OSArchitecure|equals|X64|
+| Name                | Condition | Value        |
+| ------------------- | --------- | ------------ |
+| Agent.Name          | equals    | Ubuntu.20.04 |
+| Agent.OS            | equals    | Linux        |
+| Agent.OSArchitecure | equals    | X64          |
 
 ![picture 7](../../images/e22a2f30fe0f845f36976349f586dd51f6b175a65bc62a299a5b1b3ff0520b8c.png)  
+
+</br>
 
 #### Variables 추가 (Optional)
 
 **Task** 에서 사용될 **변수값**을 사전에 정의해놓을 수 있습니다.
-이를 통해 좀 더 편리하게 정의해놓은 변수를 활용할 수 있습니다.
 
-현재 예시의 값들은 Azure devops에 등록된 **Security365Common** 을 사용할 경우에 대하여 값을 미리 넣어놨습니다.
+현재 예시의 값들은 Azure devops에 등록된 **Security365Common** 에 게시할 경우를 기준으로 만들어 놓았습니다.
 
 ![picture 0](../../images/e0458e048d73e0693d7e31367c5b3491361f1fc4faf2d1748835d937a791b1b6.png)  
 ![picture 1](../../images/8c6dd83e7cee154075b2924bdb15490c9cb4a7ad506a436cbda6f380e2eb34e6.png) 
+
+</br>
 
 #### Task 추가
 
@@ -254,6 +252,7 @@ Task 추가 시 이미 만들어둔 **publish to softcamp maven repository (for 
 
 ![picture 16](../../images/910b0373dbd3ae7b42b2e945cae8a15b610562c584efa128ca5622cfab2c204a.png)
 
+</br>
 
 ### publish 결과 확인
 
