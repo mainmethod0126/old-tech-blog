@@ -1,31 +1,30 @@
 <!-- TOC -->
 
-- [azure devops release pipeline을 활용하여 공용 라이브러리 게시하는 방법 (for Gradle)](#azure-devops-release-pipeline을-활용하여-공용-라이브러리-게시하는-방법-for-gradle)
-  - [라이브러리 프로젝트의 build.gradle 수정](#라이브러리-프로젝트의-buildgradle-수정)
-    - [maven-publish 플러그인 추가](#maven-publish-플러그인-추가)
-    - [shadowJar 플러그인 추가 (optional)](#shadowjar-플러그인-추가-optional)
-    - [shadowJar Task 정의 (optional)](#shadowjar-task-정의-optional)
-    - [publishing Task 정의](#publishing-task-정의)
-      - [구역 1 : maven repo 인증을 위한 변수 값 셋팅](#구역-1--maven-repo-인증을-위한-변수-값-셋팅)
-      - [구역 2 : publishing 될 결과물에 대한 정보를 정의하는 task](#구역-2--publishing-될-결과물에-대한-정보를-정의하는-task)
-      - [구역 3 : maven repository 정보 및 인증을 위한 task](#구역-3--maven-repository-정보-및-인증을-위한-task)
-  - [azure release pipeline 을 통한 maven repository에 publish 하기](#azure-release-pipeline-을-통한-maven-repository에-publish-하기)
-    - [순서도](#순서도)
-    - [Azure devops release pipeline 추가](#azure-devops-release-pipeline-추가)
-      - [Agent Job 선택](#agent-job-선택)
-      - [Variables 추가 (Optional)](#variables-추가-optional)
-      - [Task 추가](#task-추가)
-    - [트리깅 방식 선택 (Optional)](#트리깅-방식-선택-optional)
-    - [publish 테스트](#publish-테스트)
-    - [publish 결과 확인](#publish-결과-확인)
+- [azure devops release pipeline을 활용하여 공용 라이브러리 게시하는 방법 for Gradle](#azure-devops-release-pipeline%EC%9D%84-%ED%99%9C%EC%9A%A9%ED%95%98%EC%97%AC-%EA%B3%B5%EC%9A%A9-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC-%EA%B2%8C%EC%8B%9C%ED%95%98%EB%8A%94-%EB%B0%A9%EB%B2%95-for-gradle)
+    - [라이브러리 프로젝트의 build.gradle 수정](#%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EC%9D%98-buildgradle-%EC%88%98%EC%A0%95)
+        - [maven-publish 플러그인 추가](#maven-publish-%ED%94%8C%EB%9F%AC%EA%B7%B8%EC%9D%B8-%EC%B6%94%EA%B0%80)
+        - [shadowJar 플러그인 추가 optional](#shadowjar-%ED%94%8C%EB%9F%AC%EA%B7%B8%EC%9D%B8-%EC%B6%94%EA%B0%80-optional)
+        - [shadowJar Task 정의 optional](#shadowjar-task-%EC%A0%95%EC%9D%98-optional)
+        - [publishing Task 정의](#publishing-task-%EC%A0%95%EC%9D%98)
+            - [구역 1 : maven repo 인증을 위한 변수 값 셋팅](#%EA%B5%AC%EC%97%AD-1--maven-repo-%EC%9D%B8%EC%A6%9D%EC%9D%84-%EC%9C%84%ED%95%9C-%EB%B3%80%EC%88%98-%EA%B0%92-%EC%85%8B%ED%8C%85)
+            - [구역 2 : publishing 될 결과물에 대한 정보를 정의하는 task](#%EA%B5%AC%EC%97%AD-2--publishing-%EB%90%A0-%EA%B2%B0%EA%B3%BC%EB%AC%BC%EC%97%90-%EB%8C%80%ED%95%9C-%EC%A0%95%EB%B3%B4%EB%A5%BC-%EC%A0%95%EC%9D%98%ED%95%98%EB%8A%94-task)
+            - [구역 3 : maven repository 정보 및 인증을 위한 task](#%EA%B5%AC%EC%97%AD-3--maven-repository-%EC%A0%95%EB%B3%B4-%EB%B0%8F-%EC%9D%B8%EC%A6%9D%EC%9D%84-%EC%9C%84%ED%95%9C-task)
+    - [azure release pipeline 을 통한 maven repository에 publish 하기](#azure-release-pipeline-%EC%9D%84-%ED%86%B5%ED%95%9C-maven-repository%EC%97%90-publish-%ED%95%98%EA%B8%B0)
+        - [순서도](#%EC%88%9C%EC%84%9C%EB%8F%84)
+        - [Azure devops release pipeline 추가](#azure-devops-release-pipeline-%EC%B6%94%EA%B0%80)
+            - [Agent Job 선택](#agent-job-%EC%84%A0%ED%83%9D)
+            - [Variables 추가 Optional](#variables-%EC%B6%94%EA%B0%80-optional)
+            - [Task 추가](#task-%EC%B6%94%EA%B0%80)
+        - [트리깅 방식 선택 Optional](#%ED%8A%B8%EB%A6%AC%EA%B9%85-%EB%B0%A9%EC%8B%9D-%EC%84%A0%ED%83%9D-optional)
+        - [publish 테스트](#publish-%ED%85%8C%EC%8A%A4%ED%8A%B8)
+        - [publish 결과 확인](#publish-%EA%B2%B0%EA%B3%BC-%ED%99%95%EC%9D%B8)
+    - [끝으로](#%EB%81%9D%EC%9C%BC%EB%A1%9C)
 
 <!-- /TOC -->
 
-
-
 # azure devops release pipeline을 활용하여 공용 라이브러리 게시하는 방법 (for Gradle)
 
-java gradle 프로젝트로 만들어진 라이브러리를 azure devops release pipeline 를 통하여 게시하는 방법을 안내드립니다.
+java gradle 프로젝트로 만들어진 라이브러리를 azure devops release pipeline 를 통하여 게시하는 방법을 작성해 보았습니다.
 
 ---
 
@@ -41,6 +40,7 @@ plugins {
     // ...
 }
 ```
+
 위와 같이 **maven-publish** 라는 플러그인을 추가해줍니다.
 
 해당 플러그인은 maven repository 에 게시를 도와주는 [gradle 공식 플러그인](https://docs.gradle.org/current/userguide/publishing_maven.html) 입니다.
@@ -307,4 +307,10 @@ Task 추가 시 이미 만들어둔 **publish to softcamp maven repository (for 
 
 ![picture 3](../../images/a90231d9b9c29fd30d3c260e54c598b374969d50eefc9cad0890c7e64625962c.png)  
 
+---
 
+## 끝으로
+
+실제로 해보면 작업량은 많지 않지만 최대한 자세히 적으려다보니 가이드 내용이 좀 깁니다..ㅠ
+
+오타나 내용이 이상한 경우 **신우섭(wusub.shin@softcamp.co.kr)** 로 연락 주시면 수정하도록 하겠습니다 감사합니다
